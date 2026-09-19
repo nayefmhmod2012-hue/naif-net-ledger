@@ -1,0 +1,19 @@
+{
+  "name": "حسابات شبكة نائف نت",
+  "short_name": "نائف نت",
+  "description": "نظام الحسابات السحابي المشترك لشبكة نائف نت اللاسلكية",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#1e3a8a",
+  "dir": "rtl",
+  "lang": "ar",
+  "icons": [
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

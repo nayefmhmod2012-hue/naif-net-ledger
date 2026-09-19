@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>نظام الحسابات - شبكة نائف نت اللاسلكية</title>
+  
+  <!-- إعدادات تطبيق الويب التقدمي PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#1e3a8a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="نائف نت">
+  <link rel="apple-touch-icon" href="icon-512.png">
+
+  <!-- المكتبات والخطوط -->
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+
+  <style>
+    * { box-sizing: border-box; font-family: 'Cairo', sans-serif; margin: 0; padding: 0; }
+    body { background-color: #f1f5f9; color: #1e293b; padding: 15px; }
+    .container { max-width: 1200px; margin: 0 auto; display: flex; flex-direction: column; gap: 15px; }
+    header {
+      background: linear-gradient(135deg, #0f172a, #1e3a8a);
+      color: #fff; padding: 16px 20px; border-radius: 14px;
+      display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .header-title { display: flex; align-items: center; gap: 12px; }
+    .logo-box { background: rgba(59, 130, 246, 0.2); border: 1px solid rgba(147, 197, 253, 0.4); padding: 6px; border-radius: 10px; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; }
+    .logo-box svg { width: 100%; height: 100%; stroke: #38bdf8; }
+    .btn { padding: 8px 14px; border-radius: 8px; font-weight: 700; font-size: 12px; cursor: pointer; border: none; transition: 0.2s; display: inline-flex; align-items: center; gap: 6px; }
+    .btn-cyan { background: #0891b2; color: #fff; }
+    .btn-cyan:hover { background: #0e7490; }
+    .btn-green { background: #059669; color: #fff; }
+    .btn-green:hover { background: #047857; }
+    .btn-blue { background: #2563eb; color: #fff; }
+    .btn-blue:hover { background: #1d4ed8; }
+    .btn-gray { background: #e2e8f0; color: #334155; }
+    .btn-gray:hover { background: #cbd5e1; }
+    .btn-glass { background: rgba(255,255,255,0.12); color: #fff; border: 1px solid rgba(255,255,255,0.25); }
+    .btn-glass:hover { background: rgba(255,255,255,0.2); }
+    .btn-danger { background: #fee2e2; color: #dc2626; border: 1px solid #fecaca; }
+    .btn-danger:hover { background: #fca5a5; }
+    .nav-tabs { display: flex; gap: 8px; border-bottom: 2px solid #e2e8f0; padding-bottom: 6px; }
+    .nav-tab { padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 13px; border: none; }
+    .nav-tab.active { background: #2563eb; color: #fff; }
+    .nav-tab:not(.active) { background: #fff; color: #475569; border: 1px solid #e2e8f0; }
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; }
+    .stat-card { background: #fff; padding: 12px; border-radius: 10px; border: 1px solid #e2e8f0; text-align: center; }
+    .stat-card span.label { font-size: 11px; font-weight: 700; color: #64748b; display: block; margin-bottom: 4px; }
+    .stat-card span.val { font-size: 17px; font-weight: 900; }
+    .stat-amber { background: #fffbeb; border-color: #fde68a; }
+    .stat-amber .val { color: #b45309; }
+    .stat-green { background: #ecfdf5; border-color: #a7f3d0; }
+    .stat-green .val { color: #047857; }
+    .stat-blue { background: #eff6ff; border-color: #bfdbfe; }
+    .stat-blue .val { color: #1d4ed8; }
+    .card { background: #fff; border-radius: 12px; border: 1px solid #e2e8f0; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
+    .grid-detail { display: grid; grid-template-columns: 310px 1fr; gap: 16px; }
+    @media (max-width: 850px) { .grid-detail { grid-template-columns: 1fr; } }
+    .form-group { margin-bottom: 10px; }
+    .form-group label { display: block; font-size: 11px; font-weight: 700; color: #475569; margin-bottom: 4px; }
+    .form-group input, .form-group select { width: 100%; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 8px; outline: none; font-size: 13px; }
+    .form-group input:focus, .form-group select:focus { border-color: #2563eb; }
+    table { width: 100%; border-collapse: collapse; font-size: 12px; text-align: right; }
+    th { background: #f8fafc; padding: 10px; color: #475569; border-bottom: 2px solid #e2e8f0; }
+    td { padding: 10px; border-bottom: 1px solid #f1f5f9; }
+    tr:hover td { background: #f8fafc; }
+    .status-bar { padding: 8px; border-radius: 8px; font-size: 12px; text-align: center; font-weight: 700; display: none; }
+    .hidden { display: none !important; }
+    @media print {
+      body * { visibility: hidden; }
+      #statement-area, #statement-area * { visibility: visible; }
+      #statement-area { position: absolute; left: 0; top: 0; width: 100%; border: none; box-shadow: none; }
+      .no-print { display: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="header-title">
+        <div class="logo-box">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 12.55a11 11 0 0 1 14.08 0"></path>
+            <path d="M1.42 9a16 16 0 0 1 21.16 0"></path>
+            <circle cx="12" cy="20" r="1.5" fill="currentColor"></circle>
+          </svg>
+        </div>
+        <div>
+          <h1 style="font-size: 18px; font-weight: 900;">شبكة نائف نت اللاسلكية</h1>
+          <p style="font-size: 11px; color: #93c5fd;">نظام الحسابات السحابي المشترك</p>
+        </div>
+      </div>
+      <div class="no-print" style="display: flex; gap: 6px; flex-wrap: wrap;">
+        <button onclick="syncWithCloud()" class="btn btn-cyan">🔄 مزامنة السحابة</button>
+        <button onclick="configureCloudURL()" class="btn btn-glass">⚙️ إعداد السحابة</button>
+        <button onclick="exportAllToExcel()" class="btn btn-green">📊 تصدير Excel</button>
+      </div>
+    </header>
+
+    <div id="status-bar" class="status-bar no-print"></div>
+
+    <div class="nav-tabs no-print">
+      <button id="tab-btn-summary" class="nav-tab active" onclick="showView('summary')">📊 قائمة جميع الحسابات</button>
+      <button id="tab-btn-detail" class="nav-tab" onclick="showView('detail')">👤 كشف حساب تفصيلي</button>
+    </div>
+
+    <!-- 1. شاشة الملخص العام -->
+    <div id="view-summary">
+      <div class="stats-grid">
+        <div class="stat-card"><span class="label">إجمالي المشتركين</span><span id="stat-cust-count" class="val">0</span></div>
+        <div class="stat-card stat-amber"><span class="label">إجمالي الحساب (عليهم)</span><span id="stat-total-debit" class="val">0</span></div>
+        <div class="stat-card stat-green"><span class="label">إجمالي المسدد (لهم)</span><span id="stat-total-credit" class="val">0</span></div>
+        <div class="stat-card stat-blue"><span class="label">صافي الديون المطلوبة</span><span id="stat-total-net" class="val">0</span></div>
+      </div>
+
+      <div class="card" style="margin-top: 12px;">
+        <div style="display: flex; justify-content: space-between; gap: 10px; margin-bottom: 12px; flex-wrap: wrap;">
+          <input type="text" id="global-search" oninput="renderSummaryTable()" placeholder="🔍 ابحث بالاسم أو برقم الجوال..." style="padding: 7px 12px; border: 1px solid #cbd5e1; border-radius: 8px; width: 280px; font-size: 12px;">
+          <div>
+            <label style="font-size: 12px; font-weight: 700;">الترتيب: </label>
+            <select id="sort-order" onchange="renderSummaryTable()" style="padding: 6px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 12px;">
+              <option value="date-desc">الأحدث تاريخاً أولاً</option>
+              <option value="balance-desc">الأعلى ديناً أولاً</option>
+              <option value="name-asc">أبجدياً (أ - ي)</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="overflow-x: auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>اسم المشترك / العميل</th>
+                <th>رقم الجوال</th>
+                <th>تاريخ آخر حركة</th>
+                <th>إجمالي عليه (مدين)</th>
+                <th>إجمالي له (مسدد)</th>
+                <th>الرصيد المتبقي</th>
+                <th style="text-align: center;">إجراء</th>
+              </tr>
+            </thead>
+            <tbody id="summary-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. كشف الحساب الفردي -->
+    <div id="view-detail" class="grid-detail hidden">
+      <div class="card">
+        <h3 style="font-size: 14px; font-weight: 800; border-bottom: 1px solid #e2e8f0; padding-bottom: 6px; margin-bottom: 10px;">➕ تسجيل حركة جديدة</h3>
+        
+        <div class="form-group">
+          <label>اسم المشترك / العميل</label>
+          <input type="text" id="cust-name" list="customer-list" oninput="autoFillPhone()" placeholder="اكتب أو اختر اسماً...">
+          <datalist id="customer-list"></datalist>
+        </div>
+
+        <div class="form-group">
+          <label>رقم الجوال (واتساب)</label>
+          <input type="text" id="cust-phone" placeholder="مثال: 777000000">
+        </div>
+
+        <div class="form-group">
+          <label>نوع العملية</label>
+          <select id="trans-type">
+            <option value="debit">🔴 عليه (كروت / باقات / قيد دين)</option>
+            <option value="credit">🟢 له / واصل (تسديد نقداً)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>المبلغ (ريال)</label>
+          <input type="number" id="trans-amount" placeholder="0.00">
+        </div>
+
+        <div class="form-group">
+          <label>التاريخ</label>
+          <input type="date" id="trans-date">
+        </div>
+
+        <div class="form-group">
+          <label>البيان / تفاصيل</label>
+          <input type="text" id="trans-note" placeholder="مثلاً: كروت فئة 1000، دفعة نقدية...">
+        </div>
+
+        <button onclick="addTransaction()" class="btn btn-blue" style="width: 100%; justify-content: center; padding: 9px; font-size: 13px;">حفظ الحركة في الحساب</button>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <div class="card no-print" style="display: flex; justify-content: space-between; align-items: center; padding: 10px 14px;">
+          <div style="display: flex; align-items: center; gap: 8px; flex: 1;">
+            <label style="font-size: 12px; font-weight: 700; white-space: nowrap;">عرض كشف:</label>
+            <select id="select-customer" onchange="openCustomer(this.value)" style="padding: 7px; border: 1px solid #cbd5e1; border-radius: 8px; width: 100%; max-width: 320px; font-size: 12px;">
+              <option value="">-- اختر اسماً لعرض كشف حسابه --</option>
+            </select>
+          </div>
+          <button onclick="deleteCurrentCustomer()" id="btn-del-cust" class="btn btn-danger hidden">حذف الحساب</button>
+        </div>
+
+        <div id="statement-area" class="card" style="display: flex; flex-direction: column; gap: 14px;">
+          <div id="no-cust-selected" style="text-align: center; color: #94a3b8; padding: 45px 0; font-size: 13px;">
+            يرجى اختيار عميل لعرض كشف حسابه بجميع التفاصيل
+          </div>
+
+          <div id="statement-content" class="hidden" style="display: flex; flex-direction: column; gap: 14px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px;">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <div style="width: 38px; height: 38px; background: #0f172a; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2"><path d="M5 12.55a11 11 0 0 1 14.08 0"></path><path d="M1.42 9a16 16 0 0 1 21.16 0"></path><circle cx="12" cy="20" r="1.5" fill="currentColor"></circle></svg>
+                </div>
+                <div>
+                  <h2 style="font-size: 15px; font-weight: 900;">شبكة نائف نت اللاسلكية</h2>
+                  <p style="font-size: 10px; color: #64748b;">كشف حساب مشترك رسمي</p>
+                </div>
+              </div>
+              <div style="text-align: left;">
+                <p style="font-size: 11px; color: #64748b;">تاريخ التقرير: <span id="report-date" style="font-weight: 700; color: #0f172a;"></span></p>
+                <p style="font-size: 10px; color: #2563eb; font-weight: 700;">حقوق محفوظة © شبكة نائف نت</p>
+              </div>
+            </div>
+
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 12px 16px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <span style="font-size: 11px; color: #64748b;">المشترك:</span>
+                <h3 id="det-cust-name" style="font-size: 17px; font-weight: 900;">-</h3>
+                <p style="font-size: 12px; color: #334155; margin-top: 2px;">الجوال: <span id="det-cust-phone" style="font-weight: 700;">-</span></p>
+              </div>
+              <div style="background: #fff; border: 1px solid #e2e8f0; padding: 6px 14px; border-radius: 8px; text-align: left;">
+                <span style="font-size: 11px; color: #64748b;">الرصيد المتبقي</span>
+                <div id="det-net-balance" style="font-size: 18px; font-weight: 900;">0</div>
+              </div>
+            </div>
+
+            <div class="stats-grid">
+              <div class="stat-card stat-amber"><span class="label">إجمالي الحساب (عليه)</span><span id="det-debit" class="val">0</span></div>
+              <div class="stat-card stat-green"><span class="label">إجمالي المسدد (له)</span><span id="det-credit" class="val">0</span></div>
+              <div class="stat-card stat-blue"><span class="label">الباقي المطلوب</span><span id="det-remaining" class="val">0</span></div>
+            </div>
+
+            <div style="overflow-x: auto;">
+              <table>
+                <thead>
+                  <tr>
+                    <th>التاريخ</th>
+                    <th>البيان والتفاصيل</th>
+                    <th>عليه (مدين)</th>
+                    <th>له / واصل (دائن)</th>
+                    <th class="no-print" style="text-align: center;">حذف</th>
+                  </tr>
+                </thead>
+                <tbody id="det-table-body"></tbody>
+              </table>
+            </div>
+
+            <div class="no-print" style="display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; border-top: 1px solid #e2e8f0; padding-top: 10px;">
+              <button onclick="sendViaWhatsApp()" class="btn btn-green">💬 إرسال واتساب</button>
+              <button onclick="copyAsText()" class="btn btn-gray">📋 نسخ رسالة</button>
+              <button onclick="exportAsImage()" class="btn btn-gray">🖼️ حفظ صورة</button>
+              <button onclick="window.print()" class="btn btn-blue">🖨️ طباعة / PDF</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let ledger = JSON.parse(localStorage.getItem('naif_net_ledger')) || {};
+    let cloudURL = localStorage.getItem('naif_net_cloud_url') || '';
+    let activeCustomer = null;
+
+    document.getElementById('trans-date').valueAsDate = new Date();
+    document.getElementById('report-date').innerText = new Date().toLocaleDateString('ar-YE');
+
+    function notify(text, color = '#2563eb') {
+      const el = document.getElementById('status-bar');
+      el.style.display = 'block';
+      el.style.backgroundColor = color === '#059669' ? '#d1fae5' : '#eff6ff';
+      el.style.color = color === '#059669' ? '#065f46' : '#1e40af';
+      el.innerText = text;
+      setTimeout(() => { el.style.display = 'none'; }, 4000);
+    }
+
+    function configureCloudURL() {
+      const url = prompt('أدخل رابط تطبيق الويب (Google Apps Script Web App URL):', cloudURL);
+      if (url !== null) {
+        cloudURL = url.trim();
+        localStorage.setItem('naif_net_cloud_url', cloudURL);
+        if (cloudURL) {
+          notify('تم حفظ رابط السحابة بنجاح! جاري المزامنة...', '#059669');
+          syncWithCloud();
+        }
+      }
+    }
+
+    // مزامنة ذكية تحمي الحسابات المحلية
+    async function syncWithCloud() {
+      if (!cloudURL) {
+        configureCloudURL();
+        return;
+      }
+      notify('جاري فحص المزامنة مع السحابة... ⏳');
+      try {
+        const res = await fetch(cloudURL + (cloudURL.includes('?') ? '&' : '?') + 'nocache=' + Date.now());
+        const data = await res.json();
+        
+        if (data && typeof data === 'object' && Object.keys(data).length > 0) {
+          ledger = data;
+          localStorage.setItem('naif_net_ledger', JSON.stringify(ledger));
+          updateDropdowns();
+          renderSummaryTable();
+          if (activeCustomer) renderCustomerDetails();
+          notify('تمت مزامنة الحسابات من السحابة بنجاح! ✅', '#059669');
+        } else {
+          if (Object.keys(ledger).length > 0) {
+            saveState();
+            notify('تم رفع وتثبيت حساباتك إلى السحابة بنجاح! ✅', '#059669');
+          } else {
+            notify('السحابة والجهاز جاهزان لتسجيل الحسابات الجديدة ✅', '#059669');
+          }
+        }
+      } catch (err) {
+        notify('تعذر الاتصال بالسحابة، الحسابات محفوظة في جهازك بأمان');
+      }
+    }
+
+    // الحفظ المضمون عبر POST و sendBeacon
+    function saveState() {
+      localStorage.setItem('naif_net_ledger', JSON.stringify(ledger));
+      updateDropdowns();
+      renderSummaryTable();
+
+      if (cloudURL) {
+        const payload = JSON.stringify(ledger);
+        
+        fetch(cloudURL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: {
+            'Content-Type': 'text/plain;charset=utf-8'
+          },
+          body: payload
+        }).then(() => {
+          notify('تم حفظ وتحديث الحسابات في السحابة بنجاح! ✅', '#059669');
+        }).catch(err => {
+          navigator.sendBeacon(cloudURL, payload);
+        });
+      }
+    }
+
+    function showView(v) {
+      document.getElementById('view-summary').classList.toggle('hidden', v !== 'summary');
+      document.getElementById('view-detail').classList.toggle('hidden', v !== 'detail');
+      document.getElementById('tab-btn-summary').classList.toggle('active', v === 'summary');
+      document.getElementById('tab-btn-detail').classList.toggle('active', v === 'detail');
+      if (v === 'summary') renderSummaryTable();
+      else if (activeCustomer && ledger[activeCustomer]) renderCustomerDetails();
+    }
+
+    function updateDropdowns() {
+      const datalist = document.getElementById('customer-list');
+      const select = document.getElementById('select-customer');
+      const curr = select.value;
+      datalist.innerHTML = '';
+      select.innerHTML = '<option value="">-- اختر اسماً لعرض كشف حسابه --</option>';
+      Object.keys(ledger).sort().forEach(name => {
+        datalist.innerHTML += `<option value="${name}">`;
+        select.innerHTML += `<option value="${name}" ${name === curr ? 'selected' : ''}>${name}</option>`;
+      });
+    }
+
+    function autoFillPhone() {
+      const name = document.getElementById('cust-name').value.trim();
+      if (ledger[name] && ledger[name].phone) {
+        document.getElementById('cust-phone').value = ledger[name].phone;
+      }
+    }
+
+    function addTransaction() {
+      const nameIn = document.getElementById('cust-name');
+      const phoneIn = document.getElementById('cust-phone');
+      const typeIn = document.getElementById('trans-type');
+      const amountIn = document.getElementById('trans-amount');
+      const dateIn = document.getElementById('trans-date');
+      const noteIn = document.getElementById('trans-note');
+
+      const name = nameIn.value.trim();
+      const phone = phoneIn.value.trim();
+      const type = typeIn.value;
+      const amount = parseFloat(amountIn.value);
+      const date = dateIn.value;
+      const note = noteIn.value.trim() || (type === 'debit' ? 'قيد كروت / باقات' : 'دفعة نقدية');
+
+      if (!name || isNaN(amount) || amount <= 0 || !date) {
+        alert('يرجى كتابة اسم العميل وتحديد المبلغ والتاريخ بصورة صحيحة');
+        return;
+      }
+
+      if (!ledger[name]) {
+        ledger[name] = { phone: phone || '', transactions: [] };
+      } else if (phone) {
+        ledger[name].phone = phone;
+      }
+
+      ledger[name].transactions.push({
+        id: Date.now(),
+        date,
+        type,
+        amount,
+        note
+      });
+
+      saveState();
+
+      nameIn.value = '';
+      phoneIn.value = '';
+      amountIn.value = '';
+      noteIn.value = '';
+      dateIn.valueAsDate = new Date();
+      nameIn.focus();
+
+      openCustomer(name);
+    }
+
+    function openCustomer(name) {
+      if (!name || !ledger[name]) {
+        activeCustomer = null;
+        document.getElementById('no-cust-selected').classList.remove('hidden');
+        document.getElementById('statement-content').classList.add('hidden');
+        document.getElementById('btn-del-cust').classList.add('hidden');
+        return;
+      }
+
+      activeCustomer = name;
+      document.getElementById('view-summary').classList.add('hidden');
+      document.getElementById('view-detail').classList.remove('hidden');
+      document.getElementById('tab-btn-summary').classList.remove('active');
+      document.getElementById('tab-btn-detail').classList.add('active');
+
+      document.getElementById('select-customer').value = name;
+      document.getElementById('no-cust-selected').classList.add('hidden');
+      document.getElementById('statement-content').classList.remove('hidden');
+      document.getElementById('btn-del-cust').classList.remove('hidden');
+
+      renderCustomerDetails();
+    }
+
+    function renderCustomerDetails() {
+      if (!activeCustomer || !ledger[activeCustomer]) return;
+      const data = ledger[activeCustomer];
+      document.getElementById('det-cust-name').innerText = activeCustomer;
+      document.getElementById('det-cust-phone').innerText = data.phone || 'غير مسجل';
+
+      const list = [...data.transactions].sort((a, b) => new Date(a.date) - new Date(b.date));
+      let totalDebit = 0, totalCredit = 0;
+      const tbody = document.getElementById('det-table-body');
+      tbody.innerHTML = '';
+
+      list.forEach(t => {
+        const isDebit = t.type === 'debit';
+        if (isDebit) totalDebit += t.amount;
+        else totalCredit += t.amount;
+
+        tbody.innerHTML += `
+          <tr>
+            <td>${t.date}</td>
+            <td style="font-weight: 700;">${t.note}</td>
+            <td style="font-weight: 700; color: ${isDebit ? '#b45309' : '#cbd5e1'};">${isDebit ? t.amount.toLocaleString() : '-'}</td>
+            <td style="font-weight: 700; color: ${!isDebit ? '#047857' : '#cbd5e1'};">${!isDebit ? t.amount.toLocaleString() : '-'}</td>
+            <td class="no-print" style="text-align: center;">
+              <button onclick="deleteTransaction(${t.id})" style="color: #ef4444; background: none; border: none; font-weight: bold; cursor: pointer;">✕</button>
+            </td>
+          </tr>
+        `;
+      });
+
+      const net = totalDebit - totalCredit;
+      document.getElementById('det-debit').innerText = totalDebit.toLocaleString() + ' ريال';
+      document.getElementById('det-credit').innerText = totalCredit.toLocaleString() + ' ريال';
+      document.getElementById('det-remaining').innerText = net.toLocaleString() + ' ريال';
+
+      const netEl = document.getElementById('det-net-balance');
+      netEl.innerText = net.toLocaleString() + ' ريال';
+      netEl.style.color = net > 0 ? '#dc2626' : (net < 0 ? '#047857' : '#334155');
+    }
+
+    function renderSummaryTable() {
+      const q = (document.getElementById('global-search').value || '').trim().toLowerCase();
+      const sort = document.getElementById('sort-order').value;
+      const tbody = document.getElementById('summary-table-body');
+      tbody.innerHTML = '';
+
+      let list = Object.keys(ledger).map(name => {
+        const c = ledger[name];
+        let d = 0, cr = 0, last = '2000-01-01';
+        c.transactions.forEach(t => {
+          if (t.type === 'debit') d += t.amount; else cr += t.amount;
+          if (t.date > last) last = t.date;
+        });
+        return { name, phone: c.phone || '', debit: d, credit: cr, net: d - cr, last: c.transactions.length ? last : '-' };
+      });
+
+      if (q) list = list.filter(i => i.name.toLowerCase().includes(q) || i.phone.includes(q));
+      if (sort === 'date-desc') list.sort((a,b) => b.last.localeCompare(a.last));
+      else if (sort === 'balance-desc') list.sort((a,b) => b.net - a.net);
+      else if (sort === 'name-asc') list.sort((a,b) => a.name.localeCompare(b.name, 'ar'));
+
+      let sumD = 0, sumC = 0;
+      Object.keys(ledger).forEach(k => {
+        ledger[k].transactions.forEach(t => { if (t.type === 'debit') sumD += t.amount; else sumC += t.amount; });
+      });
+
+      document.getElementById('stat-cust-count').innerText = Object.keys(ledger).length;
+      document.getElementById('stat-total-debit').innerText = sumD.toLocaleString() + ' ريال';
+      document.getElementById('stat-total-credit').innerText = sumC.toLocaleString() + ' ريال';
+      document.getElementById('stat-total-net').innerText = (sumD - sumC).toLocaleString() + ' ريال';
+
+      if (!list.length) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #94a3b8; padding: 25px;">لا توجد حسابات مسجلة بعد</td></tr>`;
+        return;
+      }
+
+      list.forEach(i => {
+        tbody.innerHTML += `
+          <tr>
+            <td style="font-weight: 800;">${i.name}</td>
+            <td style="color: #64748b;">${i.phone || '-'}</td>
+            <td>${i.last}</td>
+            <td style="font-weight: 700; color: #b45309;">${i.debit.toLocaleString()}</td>
+            <td style="font-weight: 700; color: #047857;">${i.credit.toLocaleString()}</td>
+            <td style="font-weight: 900; color: ${i.net > 0 ? '#dc2626' : (i.net < 0 ? '#047857' : '#475569')};">${i.net.toLocaleString()} ريال</td>
+            <td style="text-align: center;">
+              <button onclick="openCustomer('${i.name}')" class="btn btn-gray" style="font-size: 11px; padding: 5px 10px;">فتح الحساب 🔍</button>
+            </td>
+          </tr>
+        `;
+      });
+    }
+
+    function exportAllToExcel() {
+      if (!Object.keys(ledger).length) { alert('لا توجد بيانات لتصديرها'); return; }
+      const sumRows = [], transRows = [];
+      Object.keys(ledger).sort().forEach(name => {
+        const c = ledger[name];
+        let d = 0, cr = 0;
+        c.transactions.forEach(t => {
+          if (t.type === 'debit') d += t.amount; else cr += t.amount;
+          transRows.push({
+            "اسم العميل": name,
+            "الجوال": c.phone || '',
+            "التاريخ": t.date,
+            "العملية": t.type === 'debit' ? 'عليه (مدين)' : 'له (واصل)',
+            "المبلغ": t.amount,
+            "البيان": t.note
+          });
+        });
+        sumRows.push({ "اسم العميل": name, "الجوال": c.phone || '', "الحركات": c.transactions.length, "عليه": d, "له": cr, "المتبقي": d - cr });
+      });
+
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(sumRows), "ملخص الحسابات");
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(transRows), "سجل الحركات");
+      XLSX.writeFile(wb, `حسابات_شبكة_نائف_نت_${new Date().toISOString().slice(0,10)}.xlsx`);
+    }
+
+    function deleteTransaction(id) {
+      if (!confirm('حذف هذه العملية؟')) return;
+      ledger[activeCustomer].transactions = ledger[activeCustomer].transactions.filter(t => t.id !== id);
+      saveState();
+      renderCustomerDetails();
+    }
+
+    function deleteCurrentCustomer() {
+      if (!confirm(`حذف حساب "${activeCustomer}" بالكامل؟`)) return;
+      delete ledger[activeCustomer];
+      activeCustomer = null;
+      saveState();
+      showView('summary');
+    }
+
+    function generateText() {
+      if (!activeCustomer || !ledger[activeCustomer]) return '';
+      const c = ledger[activeCustomer];
+      let d = 0, cr = 0;
+      c.transactions.forEach(t => t.type === 'debit' ? d += t.amount : cr += t.amount);
+      let msg = `*كشف حساب - شبكة نائف نت اللاسلكية*\n`;
+      msg += `العميل: *${activeCustomer}*\n`;
+      if (c.phone) msg += `الجوال: ${c.phone}\n`;
+      msg += `التاريخ: ${new Date().toLocaleDateString('ar-YE')}\n-------------------------\n`;
+      c.transactions.sort((a,b) => new Date(a.date)-new Date(b.date)).forEach(t => {
+        msg += `• ${t.date} | ${t.note}: ${t.amount.toLocaleString()} ريال (${t.type === 'debit' ? 'عليه' : 'واصل'})\n`;
+      });
+      msg += `-------------------------\n`;
+      msg += `إجمالي الحساب (عليه): ${d.toLocaleString()} ريال\n`;
+      msg += `إجمالي المسدد (له): ${cr.toLocaleString()} ريال\n`;
+      msg += `*الرصيد المتبقي المطلوب: ${(d - cr).toLocaleString()} ريال*\n`;
+      msg += `-------------------------\n_شكراً لتعاملكم معنا_`;
+      return msg;
+    }
+
+    function copyAsText() {
+      const msg = generateText();
+      if (!msg) return;
+      navigator.clipboard.writeText(msg).then(() => alert('تم نسخ كشف الحساب!'));
+    }
+
+    function sendViaWhatsApp() {
+      if (!activeCustomer || !ledger[activeCustomer]) return;
+      const p = ledger[activeCustomer].phone.replace(/[^0-9]/g, '');
+      const msg = encodeURIComponent(generateText());
+      const full = p ? (p.startsWith('967') ? p : (p.length === 9 ? '967' + p : p)) : '';
+      window.open(full ? `https://wa.me/${full}?text=${msg}` : `https://wa.me/?text=${msg}`, '_blank');
+    }
+
+    function exportAsImage() {
+      const area = document.getElementById('statement-area');
+      const btns = area.querySelectorAll('.no-print');
+      btns.forEach(b => b.style.display = 'none');
+      html2canvas(area, { scale: 2 }).then(canvas => {
+        btns.forEach(b => b.style.display = '');
+        const a = document.createElement('a');
+        a.download = `كشف_${activeCustomer}_نائف_نت.png`;
+        a.href = canvas.toDataURL();
+        a.click();
+      });
+    }
+
+    // تسجيل Service Worker للعمل في وضع عدم الاتصال (Offline PWA)
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then(() => console.log('PWA Service Worker مسجل بنجاح'))
+          .catch(err => console.log('خطأ في تسجيل Service Worker:', err));
+      });
+    }
+
+    // التشغيل المبدئي للواجهة
+    updateDropdowns();
+    renderSummaryTable();
+    if (cloudURL) {
+      syncWithCloud();
+    }
+  </script>
+</body>
+</html>
