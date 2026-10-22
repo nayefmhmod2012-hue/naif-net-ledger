@@ -40,6 +40,10 @@
     .btn-green:hover { background: #047857; }
     .btn-blue { background: #2563eb; color: #fff; }
     .btn-blue:hover { background: #1d4ed8; }
+    .btn-telegram { background: #0088cc; color: #fff; }
+    .btn-telegram:hover { background: #006699; }
+    .btn-restore { background: #d97706; color: #fff; }
+    .btn-restore:hover { background: #b45309; }
     .btn-gray { background: #e2e8f0; color: #334155; }
     .btn-gray:hover { background: #cbd5e1; }
     .btn-glass { background: rgba(255,255,255,0.12); color: #fff; border: 1px solid rgba(255,255,255,0.25); }
@@ -99,6 +103,10 @@
       </div>
       <div class="no-print" style="display: flex; gap: 6px; flex-wrap: wrap;">
         <button onclick="syncWithCloud()" class="btn btn-cyan">🔄 مزامنة السحابة</button>
+        <button onclick="backupToTelegram()" class="btn btn-telegram">📤 نسخ تيليجرام</button>
+        <button onclick="document.getElementById('restore-file').click()" class="btn btn-restore">📥 استعادة نسخة</button>
+        <input type="file" id="restore-file" accept=".json" style="display: none;" onchange="restoreFromJSON(event)">
+        <button onclick="configureTelegram()" class="btn btn-telegram" style="background: #005580;">⚙️ إعداد بوت تيليجرام</button>
         <button onclick="configureCloudURL()" class="btn btn-glass">⚙️ إعداد السحابة</button>
         <button onclick="exportAllToExcel()" class="btn btn-green">📊 تصدير Excel</button>
       </div>
@@ -261,8 +269,9 @@
             </div>
 
             <div class="no-print" style="display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; border-top: 1px solid #e2e8f0; padding-top: 10px;">
-              <button onclick="sendViaWhatsApp()" class="btn btn-green">💬 إرسال واتساب</button>
-              <button onclick="copyAsText()" class="btn btn-gray">📋 نسخ رسالة</button>
+              <button onclick="askWhatsAppType()" class="btn btn-green">💬 إرسال واتساب</button>
+              <button onclick="copyDetailedText()" class="btn btn-gray">📋 نسخ مفصل</button>
+              <button onclick="copySummaryText()" class="btn btn-gray" style="background: #0284c7; color: #fff;">📋 نسخ الإجمالي فقط</button>
               <button onclick="exportAsImage()" class="btn btn-gray">🖼️ حفظ صورة</button>
               <button onclick="window.print()" class="btn btn-blue">🖨️ طباعة / PDF</button>
             </div>
@@ -275,6 +284,8 @@
   <script>
     let ledger = JSON.parse(localStorage.getItem('naif_net_ledger')) || {};
     let cloudURL = localStorage.getItem('naif_net_cloud_url') || '';
+    let telegramToken = localStorage.getItem('naif_net_tg_token') || '';
+    let telegramChatId = localStorage.getItem('naif_net_tg_chatid') || '';
     let activeCustomer = null;
 
     document.getElementById('trans-date').valueAsDate = new Date();
@@ -301,7 +312,87 @@
       }
     }
 
-    // مزامنة ذكية تحمي الحسابات المحلية
+    function configureTelegram() {
+      const token = prompt('أدخل توكن بوت تيليجرام (Telegram Bot Token):', telegramToken);
+      if (token !== null) {
+        const chatId = prompt('أدخل رقم معرف الدردشة (Chat ID الخاص بك):', telegramChatId);
+        if (chatId !== null) {
+          telegramToken = token.trim();
+          telegramChatId = chatId.trim();
+          localStorage.setItem('naif_net_tg_token', telegramToken);
+          localStorage.setItem('naif_net_tg_chatid', telegramChatId);
+          notify('✅ تم حفظ إعدادات بوت تيليجرام بنجاح!', '#059669');
+        }
+      }
+    }
+
+    async function backupToTelegram() {
+      if (!telegramToken || !telegramChatId) {
+        configureTelegram();
+        return;
+      }
+
+      const backupData = JSON.stringify(ledger, null, 2);
+      const blob = new Blob([backupData], { type: 'application/json' });
+      
+      const now = new Date();
+      const timeString = now.toTimeString().split(' ')[0].replace(/:/g, '-');
+      const dateTimeString = `${now.toISOString().slice(0,10)}_${timeString}`;
+
+      const formData = new FormData();
+      formData.append('chat_id', telegramChatId);
+      formData.append('document', blob, `naif-net-backup-${dateTimeString}.json`);
+      formData.append('caption', `📦 نسخة احتياطية لنظام نائف نت\n📅 التاريخ والوقت: ${now.toLocaleString('ar-YE')}`);
+
+      notify('⏳ جاري إرسال النسخة الاحتياطية إلى تيليجرام...');
+
+      try {
+        let response = await fetch(`https://api.telegram.org/bot${telegramToken}/sendDocument`, {
+          method: 'POST',
+          body: formData
+        });
+        
+        let result = await response.json();
+        if (result.ok) {
+          notify('✅ تم إرسال النسخة الاحتياطية إلى تيليجرام بنجاح!', '#059669');
+        } else {
+          notify('❌ فشل الإرسال، تأكد من صحة التوكن والـ ID.');
+        }
+      } catch (error) {
+        console.error(error);
+        notify('⚠️ حدث خطأ في الاتصال بشبكة تيليجرام.');
+      }
+    }
+
+    function restoreFromJSON(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const importedData = JSON.parse(e.target.result);
+          if (importedData && typeof importedData === 'object') {
+            if (confirm('⚠️ تنبيه: هل أنت متأكد من استعادة هذه البيانات؟ سيتم دمج أو استبدال البيانات الحالية بالنسخة المكتشفة.')) {
+              ledger = importedData;
+              saveState();
+              updateDropdowns();
+              renderSummaryTable();
+              if (activeCustomer) openCustomer(activeCustomer);
+              notify('✅ تمت استعادة الحسابات والبيانات بنجاح!', '#059669');
+            }
+          } else {
+            alert('❌ ملف النسخة الاحتياطية غير صالح أو تالف.');
+          }
+        } catch (error) {
+          console.error(error);
+          alert('❌ حدث خطأ أثناء قراءة ملف الـ JSON.');
+        }
+      };
+      reader.readAsText(file);
+      event.target.value = '';
+    }
+
     async function syncWithCloud() {
       if (!cloudURL) {
         configureCloudURL();
@@ -332,7 +423,6 @@
       }
     }
 
-    // الحفظ المضمون عبر POST و sendBeacon
     function saveState() {
       localStorage.setItem('naif_net_ledger', JSON.stringify(ledger));
       updateDropdowns();
@@ -586,15 +676,17 @@
       showView('summary');
     }
 
-    function generateText() {
+    // توليد رسالة الكشف بالتفصيل مع وقت النسخ
+    function generateDetailedText() {
       if (!activeCustomer || !ledger[activeCustomer]) return '';
       const c = ledger[activeCustomer];
       let d = 0, cr = 0;
       c.transactions.forEach(t => t.type === 'debit' ? d += t.amount : cr += t.amount);
-      let msg = `*كشف حساب - شبكة نائف نت اللاسلكية*\n`;
+      const now = new Date();
+      let msg = `*كشف حساب تفصيلي - شبكة نائف نت اللاسلكية*\n`;
       msg += `العميل: *${activeCustomer}*\n`;
       if (c.phone) msg += `الجوال: ${c.phone}\n`;
-      msg += `التاريخ: ${new Date().toLocaleDateString('ar-YE')}\n-------------------------\n`;
+      msg += `وقت النسخ: ${now.toLocaleString('ar-YE')}\n-------------------------\n`;
       c.transactions.sort((a,b) => new Date(a.date)-new Date(b.date)).forEach(t => {
         msg += `• ${t.date} | ${t.note}: ${t.amount.toLocaleString()} ريال (${t.type === 'debit' ? 'عليه' : 'واصل'})\n`;
       });
@@ -606,16 +698,52 @@
       return msg;
     }
 
-    function copyAsText() {
-      const msg = generateText();
-      if (!msg) return;
-      navigator.clipboard.writeText(msg).then(() => alert('تم نسخ كشف الحساب!'));
+    // توليد رسالة الإجمالي فقط مع وقت النسخ
+    function generateSummaryText() {
+      if (!activeCustomer || !ledger[activeCustomer]) return '';
+      const c = ledger[activeCustomer];
+      let d = 0, cr = 0;
+      c.transactions.forEach(t => t.type === 'debit' ? d += t.amount : cr += t.amount);
+      const now = new Date();
+      let msg = `*ملخص حساب - شبكة نائف نت اللاسلكية*\n`;
+      msg += `العميل: *${activeCustomer}*\n`;
+      if (c.phone) msg += `الجوال: ${c.phone}\n`;
+      msg += `وقت النسخ: ${now.toLocaleString('ar-YE')}\n-------------------------\n`;
+      msg += `إجمالي عليه (مدين): ${d.toLocaleString()} ريال\n`;
+      msg += `إجمالي له (مسدد): ${cr.toLocaleString()} ريال\n`;
+      msg += `*الرصيد المتبقي المطلوب: ${(d - cr).toLocaleString()} ريال*\n`;
+      msg += `-------------------------\n_شكراً لتعاملكم معنا_`;
+      return msg;
     }
 
-    function sendViaWhatsApp() {
+    function copyDetailedText() {
+      const msg = generateDetailedText();
+      if (!msg) return;
+      navigator.clipboard.writeText(msg).then(() => alert('✅ تم نسخ كشف الحساب بالتفصيل مع الوقت!'));
+    }
+
+    function copySummaryText() {
+      const msg = generateSummaryText();
+      if (!msg) return;
+      navigator.clipboard.writeText(msg).then(() => alert('✅ تم نسخ الإجمالي المتبقي فقط مع الوقت!'));
+    }
+
+    // دالة سؤال المستخدم عند الضغط على إرسال واتساب (مفصل أو إجمالي فقط)
+    function askWhatsAppType() {
+      if (!activeCustomer || !ledger[activeCustomer]) return;
+      const choice = prompt('اختر طريقة الإرسال عبر الواتساب:\n1 - كشف الحساب مفصلاً\n2 - الإجمالي المطلوب فقط\n\nاكتب رقم 1 أو 2:', '1');
+      
+      if (choice === '1') {
+        sendViaWhatsApp(generateDetailedText());
+      } else if (choice === '2') {
+        sendViaWhatsApp(generateSummaryText());
+      }
+    }
+
+    function sendViaWhatsApp(msgText) {
       if (!activeCustomer || !ledger[activeCustomer]) return;
       const p = ledger[activeCustomer].phone.replace(/[^0-9]/g, '');
-      const msg = encodeURIComponent(generateText());
+      const msg = encodeURIComponent(msgText);
       const full = p ? (p.startsWith('967') ? p : (p.length === 9 ? '967' + p : p)) : '';
       window.open(full ? `https://wa.me/${full}?text=${msg}` : `https://wa.me/?text=${msg}`, '_blank');
     }
@@ -624,10 +752,16 @@
       const area = document.getElementById('statement-area');
       const btns = area.querySelectorAll('.no-print');
       btns.forEach(b => b.style.display = 'none');
+      
       html2canvas(area, { scale: 2 }).then(canvas => {
         btns.forEach(b => b.style.display = '');
+        
+        const now = new Date();
+        const timeString = now.toTimeString().split(' ')[0].replace(/:/g, '-');
+        const dateTimeString = `${now.toISOString().slice(0,10)}_${timeString}`;
+        
         const a = document.createElement('a');
-        a.download = `كشف_${activeCustomer}_نائف_نت.png`;
+        a.download = `كشف_${activeCustomer}_${dateTimeString}.png`;
         a.href = canvas.toDataURL();
         a.click();
       });
