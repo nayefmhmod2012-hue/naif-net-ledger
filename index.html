@@ -33,6 +33,18 @@
     .header-title { display: flex; align-items: center; gap: 12px; }
     .logo-box { background: rgba(59, 130, 246, 0.2); border: 1px solid rgba(147, 197, 253, 0.4); padding: 6px; border-radius: 10px; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; }
     .logo-box svg { width: 100%; height: 100%; stroke: #38bdf8; }
+    .live-clock-bar {
+      background: rgba(15, 23, 42, 0.55); border: 1px solid rgba(147, 197, 253, 0.3);
+      padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 700;
+      color: #e2e8f0; display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 6px;
+    }
+    .app-status-badge {
+      padding: 2px 8px; border-radius: 6px; font-size: 10px; font-weight: 900;
+      background: #dcfce7; color: #166534;
+    }
+    .app-status-badge.offline {
+      background: #fef3c7; color: #92400e;
+    }
     .btn { padding: 8px 14px; border-radius: 8px; font-weight: 700; font-size: 12px; cursor: pointer; border: none; transition: 0.2s; display: inline-flex; align-items: center; gap: 6px; }
     .btn-cyan { background: #0891b2; color: #fff; }
     .btn-cyan:hover { background: #0e7490; }
@@ -77,6 +89,94 @@
     tr:hover td { background: #f8fafc; }
     .status-bar { padding: 8px; border-radius: 8px; font-size: 12px; text-align: center; font-weight: 700; display: none; }
     .hidden { display: none !important; }
+
+    .entry-split-grid {
+      display: grid;
+      grid-template-columns: 420px 1fr;
+      gap: 16px;
+      align-items: start;
+      width: 100%;
+    }
+    @media (max-width: 900px) {
+      .entry-split-grid { grid-template-columns: 1fr; }
+    }
+    .left-statement-card {
+      background: #fff;
+      border-radius: 12px;
+      border: 1.5px solid #cbd5e1;
+      padding: 16px;
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+
+    .instant-balance-card {
+      background: #f0f9ff; border: 1px solid #7dd3fc; border-radius: 8px;
+      padding: 8px 10px; margin-bottom: 10px; font-size: 11px; font-weight: 800; color: #0c4a6e;
+      display: none; flex-direction: column; gap: 4px;
+    }
+    .instant-balance-row { display: flex; justify-content: space-between; gap: 6px; flex-wrap: wrap; }
+    .quick-presets-wrap { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px; }
+    .quick-preset-btn {
+      background: #eff6ff; border: 1px solid #bfdbfe; color: #1d4ed8;
+      border-radius: 999px; padding: 3px 9px; font-size: 11px; font-weight: 800; cursor: pointer;
+    }
+    .quick-preset-btn:hover { background: #2563eb; color: #fff; border-color: #2563eb; }
+    .voucher-box {
+      background: #f8fafc; border: 1.5px solid #93c5fd; border-radius: 10px;
+      padding: 10px; margin-bottom: 10px; display: none; flex-direction: column; gap: 8px;
+    }
+    .voucher-box.open { display: flex; }
+    .voucher-grid-3 { display: grid; grid-template-columns: 1.5fr 1fr 1fr; gap: 8px; }
+    @media (max-width: 600px) { .voucher-grid-3 { grid-template-columns: 1fr; } }
+    .voucher-total-bar {
+      background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px;
+      padding: 7px 10px; display: flex; justify-content: space-between; align-items: center;
+      font-size: 12px; font-weight: 900; color: #1e3a8a;
+    }
+    .voucher-lines-list { display: flex; flex-direction: column; gap: 5px; }
+    .voucher-line-row {
+      display: grid; grid-template-columns: 1.6fr 0.8fr 0.9fr 0.9fr auto; gap: 6px; align-items: center;
+      background: #fff; border: 1px solid #e2e8f0; border-radius: 7px; padding: 5px 7px; font-size: 11px;
+    }
+    .voucher-line-row input {
+      width: 100%; padding: 5px 6px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 11px; font-weight: 700;
+    }
+    .filter-pills { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+    .filter-pill-btn {
+      padding: 5px 11px; border-radius: 8px; border: 1px solid #cbd5e1;
+      background: #f8fafc; color: #334155; font-size: 11px; font-weight: 800; cursor: pointer;
+    }
+    .filter-pill-btn.active { background: #1e3a8a; color: #fff; border-color: #1e3a8a; }
+    .last-tx-banner {
+      background: #fffbeb; border: 1px solid #fde68a; color: #92400e;
+      border-radius: 8px; padding: 7px 12px; font-size: 11px; font-weight: 800;
+    }
+
+
+    /* نافذة التعليمات المنبثقة (Modal) حتى لا تزحم الشاشة */
+    .modal-backdrop {
+      position: fixed; inset: 0; background: rgba(15, 23, 42, 0.72);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 9999; padding: 14px;
+    }
+    .modal-card {
+      background: #fff; border-radius: 14px; max-width: 720px; width: 100%;
+      max-height: 88vh; overflow-y: auto; padding: 18px;
+      box-shadow: 0 20px 45px rgba(0,0,0,0.3);
+      display: flex; flex-direction: column; gap: 12px;
+    }
+    .settings-box { background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 10px; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+    .settings-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; }
+    .modal-tabs { display: flex; gap: 8px; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px; flex-wrap: wrap; }
+    .modal-tab { padding: 7px 14px; border-radius: 8px; font-size: 12px; font-weight: 800; cursor: pointer; border: 1px solid #cbd5e1; background: #f8fafc; color: #334155; }
+    .modal-tab.active { background: #1e3a8a; color: #fff; border-color: #1e3a8a; }
+    .code-area { background: #0f172a; color: #e2e8f0; border-radius: 10px; padding: 10px; }
+    .code-area pre { direction: ltr; text-align: left; font-family: Consolas, monospace; font-size: 11px; line-height: 1.45; overflow-x: auto; max-height: 210px; background: #020617; padding: 8px; border-radius: 6px; color: #93c5fd; margin-top: 6px; }
+    .steps-list { padding-right: 18px; font-size: 12px; line-height: 1.8; color: #334155; }
+
     @media print {
       body * { visibility: hidden; }
       #statement-area, #statement-area * { visibility: visible; }
@@ -86,6 +186,129 @@
   </style>
 </head>
 <body>
+  <!-- نافذة موحدة لإعدادات السحابة وتيليجرام مع التعليمات -->
+  <div id="instructions-modal" class="modal-backdrop hidden no-print" onclick="if(event.target===this) toggleInstructionsModal()">
+    <div class="modal-card">
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px;">
+        <h3 style="font-size: 15px; font-weight: 900; color: #0f172a;">⚙️ إعدادات السحابة وتيليجرام والتعليمات</h3>
+        <button onclick="toggleInstructionsModal()" class="btn btn-danger" style="padding: 5px 10px; font-size: 11px;">إغلاق ✕</button>
+      </div>
+
+      <div class="modal-tabs">
+        <button id="m-tab-settings" class="modal-tab active" onclick="switchModalTab('settings')">⚙️ الإعدادات والربط</button>
+        <button id="m-tab-google" class="modal-tab" onclick="switchModalTab('google')">☁️ تعليمات وكود Google Sheets</button>
+        <button id="m-tab-telegram" class="modal-tab" onclick="switchModalTab('telegram')">✈️ تعليمات بوت تيليجرام</button>
+      </div>
+
+      <!-- خانة الإعدادات الموحدة للسحابة وتيليجرام -->
+      <div id="m-body-settings" class="settings-box">
+        <div class="form-group" style="margin-bottom: 0;">
+          <label>رابط السحابة (Google Apps Script Web App URL):</label>
+          <input type="text" id="modal-cloud-url" placeholder="https://script.google.com/macros/s/..../exec">
+        </div>
+        <div class="settings-grid">
+          <div class="form-group" style="margin-bottom: 0;">
+            <label>توكن بوت تيليجرام (Telegram Bot Token):</label>
+            <input type="text" id="modal-tg-token" placeholder="123456789:ABCdefGhIJKlmNoPQRsTUVwxyZ">
+          </div>
+          <div class="form-group" style="margin-bottom: 0;">
+            <label>رقم معرف الدردشة (Chat ID):</label>
+            <input type="text" id="modal-tg-chatid" placeholder="رقم حسابك أو معرف القناة">
+          </div>
+        </div>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+          <button onclick="saveUnifiedSettings()" class="btn btn-blue">💾 حفظ الإعدادات</button>
+          <button onclick="saveUnifiedSettings(); syncWithCloud();" class="btn btn-cyan">🔄 حفظ ومزامنة السحابة</button>
+          <button onclick="saveUnifiedSettings(); backupToTelegram();" class="btn btn-telegram">📤 حفظ وإرسال نسخة تيليجرام</button>
+        </div>
+      </div>
+
+      <!-- محتوى تعليمات وكود جوجل -->
+      <div id="m-body-google" class="hidden" style="display: flex; flex-direction: column; gap: 10px;">
+        <div class="code-area">
+          <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap;">
+            <span style="font-size: 11px; font-weight: 700; color: #38bdf8;">كود Google Apps Script الجاهز (انسخه والصقه في Extensions &gt; Apps Script):</span>
+            <button onclick="copyGasCode()" class="btn btn-blue" style="padding: 5px 12px; font-size: 11px;">📋 نسخ الكود كامل</button>
+          </div>
+          <pre id="gas-source-code">function getOrCreateSheet() {
+  var fileName = "حسابات شبكة نائف نت";
+  var files = DriveApp.getFilesByName(fileName);
+  var ss;
+  if (files.hasNext()) {
+    ss = SpreadsheetApp.open(files.next());
+  } else {
+    ss = SpreadsheetApp.create(fileName);
+  }
+  var sheet = ss.getSheetByName("بيانات_الحسابات");
+  if (!sheet) {
+    sheet = ss.insertSheet("بيانات_الحسابات");
+  }
+  return sheet;
+}
+
+function doGet(e) {
+  var sheet = getOrCreateSheet();
+  
+  // حفظ عبر GET
+  if (e && e.parameter && e.parameter.save_data) {
+    sheet.getRange(1, 1).setValue(e.parameter.save_data);
+    return ContentService.createTextOutput(JSON.stringify({status: "ok"}))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+
+  // قراءة الحسابات للمزامنة
+  var data = sheet.getRange(1, 1).getValue();
+  return ContentService.createTextOutput(data || "{}")
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+function doPost(e) {
+  var sheet = getOrCreateSheet();
+  var rawData = "";
+  
+  if (e && e.postData && e.postData.contents) {
+    rawData = e.postData.contents;
+  } else if (e && e.parameter && e.parameter.data) {
+    rawData = e.parameter.data;
+  }
+  
+  if (rawData) {
+    sheet.getRange(1, 1).setValue(rawData);
+  }
+  
+  return ContentService.createTextOutput(JSON.stringify({status: "ok"}))
+    .setMimeType(ContentService.MimeType.JSON);
+}</pre>
+        </div>
+
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px;">
+          <strong style="font-size: 12px; color: #0f172a; display: block; margin-bottom: 4px;">خطوات تفعيل السكربت والربط السحابي:</strong>
+          <ol class="steps-list">
+            <li><strong>نسخ الكود:</strong> اضغط على زر <strong>📋 نسخ الكود كامل</strong> بالأعلى لنسخ كود Google Apps Script.</li>
+            <li><strong>فتح محرر السكربت:</strong> افتح حسابك في <strong>Google Drive</strong> أو أنشئ جدول بيانات جديد في <strong>Google Sheets</strong>، ثم من القائمة العلوية اختر <strong>Extensions</strong> ثم <strong>Apps Script</strong>.</li>
+            <li><strong>لصق وحفظ الكود:</strong> احذف أي كود افتراضي موجود داخل المحرر، والصق الكود الذي نسخته، ثم اضغط أيقونة الحفظ (Save).</li>
+            <li><strong>نشر السكربت كـ Web App:</strong> اضغط على زر <strong>Deploy</strong> في الأعلى ثم اختر <strong>New deployment</strong>، ومن أيقونة الترس بجانب Select type اختر <strong>Web app</strong>.</li>
+            <li><strong>ضبط الصلاحيات:</strong> في خانة <strong>Execute as</strong> اتركها <strong>Me</strong>، وفي خانة <strong>Who has access</strong> اختر <strong>Anyone</strong>، ثم اضغط <strong>Deploy</strong> ووافق على الأذونات.</li>
+            <li><strong>ربط الرابط بالنظام:</strong> انسخ رابط <strong>Web app URL</strong> الناتج، ثم اضغط في شريط النظام على زر <strong>⚙️ إعدادات السحابة وتيليجرام والتعليمات</strong> والصق الرابط ليتم الربط والمزامنة تلقائياً (وسيُنشئ السكربت تلقائياً ملفاً باسم <strong>حسابات شبكة نائف نت</strong> وبداخله ورقة <strong>بيانات_الحسابات</strong>).</li>
+          </ol>
+        </div>
+      </div>
+
+      <!-- محتوى تعليمات تيليجرام -->
+      <div id="m-body-telegram" class="hidden" style="display: flex; flex-direction: column; gap: 10px;">
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px;">
+          <strong style="font-size: 12px; color: #0e7490; display: block; margin-bottom: 6px;">خطوات ربط البوت وإرسال النسخ الاحتياطية إلى تيليجرام:</strong>
+          <ol class="steps-list">
+            <li><strong>إنشاء البوت والحصول على التوكن:</strong> افتح تطبيق تيليجرام وابحث عن <strong>@BotFather</strong>، أرسل الأمر <code>/newbot</code> واتبع الخطوات لتسمية البوت وتحصل على <strong>Bot Token</strong>.</li>
+            <li><strong>تفعيل البوت والحصول على Chat ID:</strong> افتح البوت الذي أنشأته واضغط <strong>Start (بدء)</strong>، ثم افتح <strong>@userinfobot</strong> لنسخ رقم <strong>Id</strong> الخاص بحسابك (أو رقم القناة بعد إضافة البوت مشرفاً فيها).</li>
+            <li><strong>حفظ البيانات في النظام:</strong> من تبويب <strong>⚙️ الإعدادات والربط</strong> أدخل التوكن ثم رقم الـ Chat ID واضغط <strong>💾 حفظ الإعدادات</strong>.</li>
+            <li><strong>إرسال نسخة احتياطية:</strong> اضغط على زر <strong>📤 نسخ تيليجرام</strong> لإرسال ملف <code>JSON</code> بجميع الحسابات مرفقاً بالتاريخ والوقت إلى دردشتك مباشرة.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="container">
     <header>
       <div class="header-title">
@@ -99,15 +322,19 @@
         <div>
           <h1 style="font-size: 18px; font-weight: 900;">شبكة نائف نت اللاسلكية</h1>
           <p style="font-size: 11px; color: #93c5fd;">نظام الحسابات السحابي المشترك</p>
+          <div class="live-clock-bar">
+            <span id="live-datetime">📅 --/--/---- | 🕒 --:--:--</span>
+            <span id="app-run-status" class="app-status-badge">🟢 التطبيق شغال (متصل)</span>
+          </div>
         </div>
       </div>
       <div class="no-print" style="display: flex; gap: 6px; flex-wrap: wrap;">
         <button onclick="syncWithCloud()" class="btn btn-cyan">🔄 مزامنة السحابة</button>
+        <button onclick="downloadBackupToDevice()" class="btn btn-green">📱 حفظ نسخة للجوال</button>
         <button onclick="backupToTelegram()" class="btn btn-telegram">📤 نسخ تيليجرام</button>
         <button onclick="document.getElementById('restore-file').click()" class="btn btn-restore">📥 استعادة نسخة</button>
         <input type="file" id="restore-file" accept=".json" style="display: none;" onchange="restoreFromJSON(event)">
-        <button onclick="configureTelegram()" class="btn btn-telegram" style="background: #005580;">⚙️ إعداد بوت تيليجرام</button>
-        <button onclick="configureCloudURL()" class="btn btn-glass">⚙️ إعداد السحابة</button>
+        <button onclick="openUnifiedPanel('settings')" class="btn btn-glass">⚙️ إعدادات السحابة وتيليجرام والتعليمات</button>
         <button onclick="exportAllToExcel()" class="btn btn-green">📊 تصدير Excel</button>
       </div>
     </header>
@@ -115,12 +342,187 @@
     <div id="status-bar" class="status-bar no-print"></div>
 
     <div class="nav-tabs no-print">
-      <button id="tab-btn-summary" class="nav-tab active" onclick="showView('summary')">📊 قائمة جميع الحسابات</button>
+      <button id="tab-btn-entry" class="nav-tab active" onclick="showView('entry')">➕ تسجيل حركة جديدة</button>
+      <button id="tab-btn-summary" class="nav-tab" onclick="showView('summary')">📊 قائمة جميع الحسابات</button>
       <button id="tab-btn-detail" class="nav-tab" onclick="showView('detail')">👤 كشف حساب تفصيلي</button>
     </div>
 
+    <!-- 0. تسجيل حركة جديدة (الخانة الأولى مع كشف الحساب باليسار) -->
+    <div id="view-entry" class="entry-split-grid">
+      <div class="card" style="width: 100%;">
+        <h3 style="font-size: 15px; font-weight: 900; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px; margin-bottom: 12px;">➕ تسجيل حركة جديدة</h3>
+
+      <div class="form-group">
+        <label>اسم المشترك / العميل</label>
+        <input type="text" id="entry-cust-name" list="customer-list" oninput="onEntryCustomerChange()" placeholder="اكتب أو اختر اسماً...">
+      </div>
+
+      <div id="entry-instant-balance" class="instant-balance-card">
+        <div class="instant-balance-row">
+          <span>عليه: <b id="entry-bal-debit" style="color:#b45309;">0 ريال</b></span>
+          <span>له: <b id="entry-bal-credit" style="color:#047857;">0 ريال</b></span>
+          <span>المتبقي: <b id="entry-bal-net" style="color:#dc2626;">0 ريال</b></span>
+        </div>
+        <div id="entry-last-move" style="font-size:10px; color:#475569;">آخر حركة: -</div>
+      </div>
+
+      <div id="entry-quick-cards-section" class="form-group" style="margin-bottom:6px; display:none;">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:6px; flex-wrap:wrap; margin-bottom:4px;">
+          <label style="margin-bottom:0;">⚡ إصدار سريع للكروت (يظهر في فاتورة كروت فقط)</label>
+          <button type="button" onclick="toggleAddCardDenomBox()" class="btn btn-gray" style="padding:2px 8px; font-size:10px;">➕ إضافة / تعديل فئة</button>
+        </div>
+        <div id="quick-cards-chips" class="quick-presets-wrap" style="margin-bottom:6px;"></div>
+        <div id="add-card-denom-box" class="hidden" style="background:#eff6ff; border:1px solid #93c5fd; border-radius:8px; padding:8px; margin-bottom:6px; display:flex; flex-direction:column; gap:6px;">
+          <div style="display:grid; grid-template-columns:1.4fr 1fr auto; gap:6px; align-items:center;">
+            <input type="text" id="new-card-label" placeholder="اسم الفئة (مثلاً: كروت 150)" style="padding:5px 7px; border:1px solid #cbd5e1; border-radius:6px; font-size:11px; font-weight:700;">
+            <input type="number" step="any" id="new-card-price" placeholder="السعر (ريال)" style="padding:5px 7px; border:1px solid #cbd5e1; border-radius:6px; font-size:11px; font-weight:700; text-align:center;">
+            <button type="button" onclick="saveNewCardDenomination()" class="btn btn-blue" style="padding:5px 10px; font-size:11px;">حفظ الفئة</button>
+          </div>
+          <div style="font-size:10px; color:#1e3a8a; font-weight:700;">💡 نصيحة: اضغط على زر ✕ بجانب أي فئة لحذفها، أو اكتب نفس اسم الفئة لتعديل سعرها.</div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>رقم الجوال (واتساب)</label>
+        <input type="text" id="entry-cust-phone" placeholder="مثال: 777000000">
+      </div>
+
+      <div class="form-group">
+        <label>نوع التسجيل / العملية</label>
+        <select id="entry-mode" onchange="onEntryModeChange()">
+          <option value="normal_debit" selected>🔴 عليه — حركة عادية (كروت / باقات / قيد دين)</option>
+          <option value="normal_credit">🟢 له / واصل — حركة عادية (دفعة / تسديد)</option>
+          <option value="cards">🧾 فاتورة كروت — عليه (صنف + سعر ثابت + العدد => الإجمالي)</option>
+          <option value="details">📋 فاتورة تفاصيل — عليه (عدة بنود)</option>
+          <option value="settled">✅ تسديد مسدد — له / واصل</option>
+        </select>
+      </div>
+
+      <div id="entry-cards-panel" class="voucher-box">
+        <div style="font-size:11px; font-weight:900; color:#1e3a8a;">🧾 حاسبة فاتورة الكروت (السعر ثابت والعدد عليك)</div>
+        <div class="voucher-grid-3">
+          <div>
+            <label style="font-size:10px; font-weight:700; color:#475569; display:block; margin-bottom:3px;">الصنف / الفئة</label>
+            <select id="card-preset-select" onchange="onCardPresetChange()" style="width:100%; padding:6px 8px; border:1px solid #cbd5e1; border-radius:7px; font-size:12px; font-weight:700;">
+              <option value="100|كروت فئة 100 ريال" selected>كروت فئة 100 ريال (100)</option>
+              <option value="200|كروت فئة 200 ريال">كروت فئة 200 ريال (200)</option>
+              <option value="250|كروت فئة 250 ريال">كروت فئة 250 ريال (250)</option>
+              <option value="300|كروت فئة 300 ريال">كروت فئة 300 ريال (300)</option>
+              <option value="500|كروت فئة 500 ريال">كروت فئة 500 ريال (500)</option>
+              <option value="custom|صنف مخصص">صنف مخصص...</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:10px; font-weight:700; color:#475569; display:block; margin-bottom:3px;">سعر الواحد (ثابت)</label>
+            <input type="number" step="any" id="card-unit-price" value="100" readonly style="width:100%; padding:6px 8px; border:1px solid #cbd5e1; border-radius:7px; font-size:12px; font-weight:800; background:#f1f5f9; color:#0f172a; text-align:center;">
+          </div>
+          <div>
+            <label style="font-size:10px; font-weight:700; color:#475569; display:block; margin-bottom:3px;">العدد</label>
+            <input type="number" step="any" min="0" id="card-qty" oninput="calcCardsVoucher()" placeholder="أدخل العدد..." style="width:100%; padding:6px 8px; border:1.5px solid #2563eb; border-radius:7px; font-size:12px; font-weight:900; text-align:center;">
+          </div>
+        </div>
+        <div class="voucher-total-bar">
+          <span>إجمالي الكروت:</span>
+          <span id="card-calc-total">0 ريال</span>
+        </div>
+      </div>
+
+      <div id="entry-details-panel" class="voucher-box">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span style="font-size:11px; font-weight:900; color:#1e3a8a;">📋 بنود فاتورة التفاصيل</span>
+          <button type="button" onclick="addDetailVoucherLine()" class="btn btn-gray" style="padding:3px 9px; font-size:11px;">➕ بند</button>
+        </div>
+        <div id="detail-voucher-lines" class="voucher-lines-list"></div>
+        <div class="voucher-total-bar">
+          <span>إجمالي التفاصيل:</span>
+          <span id="detail-calc-total">0 ريال</span>
+        </div>
+      </div>
+
+      <select id="entry-trans-type" style="display:none;" aria-hidden="true">
+        <option value="debit" selected>عليه</option>
+        <option value="credit">له / واصل</option>
+      </select>
+
+      <div class="form-group">
+        <label>عبر إيش (طريقة الدفع / التحصيل)</label>
+        <select id="entry-payment-channel" onchange="syncChannelToNote()">
+          <option value="نقداً" selected>نقداً</option>
+          <option value="تحويل / بنك">تحويل / بنك</option>
+          <option value="كريمي / محفظة">كريمي / محفظة</option>
+          <option value="آجل / حساب">آجل / حساب</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>المبلغ (ريال)</label>
+        <input type="number" step="any" id="entry-trans-amount" placeholder="0.00">
+      </div>
+
+      <div class="form-group">
+        <label>التاريخ</label>
+        <input type="date" id="entry-trans-date">
+      </div>
+
+      <div class="form-group">
+        <label>البيان / تفاصيل</label>
+        <input type="text" id="entry-trans-note" placeholder="مثلاً: كروت فئة 1000، دفعة نقدية...">
+      </div>
+
+        <button type="button" onclick="addTransactionFromFirstTab()" class="btn btn-blue" style="width: 100%; justify-content: center; padding: 10px; font-size: 13px;">حفظ الحركة في الحساب</button>
+      </div>
+
+      <!-- كشف الحساب باليسار عند اختيار العميل أو إضافة أي حركة لحسابه -->
+      <div id="entry-left-statement" class="left-statement-card">
+        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #e2e8f0; padding-bottom:8px; flex-wrap:wrap; gap:8px;">
+          <div>
+            <h3 style="font-size:15px; font-weight:900; color:#0f172a;">📄 كشف الحساب (يسار)</h3>
+            <p style="font-size:11px; color:#64748b;">يظهر ويتحدث تلقائياً عند إضافة أي حركة لأي شخص</p>
+          </div>
+          <button type="button" id="entry-open-full-stmt-btn" onclick="jumpToFullStatement()" class="btn btn-gray hidden" style="font-size:11px; padding:5px 10px;">فتح الكشف الكامل 👤</button>
+        </div>
+
+        <div id="entry-stmt-empty" style="text-align:center; color:#94a3b8; padding:36px 10px; font-size:12px; font-weight:700;">
+          اختر شخصاً أو أضف حركة جديدة ليظهر كشف حسابه هنا مباشرة
+        </div>
+
+        <div id="entry-stmt-body" class="hidden" style="display:flex; flex-direction:column; gap:10px;">
+          <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:10px 14px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+            <div>
+              <div id="entry-stmt-name" style="font-size:16px; font-weight:900; color:#0f172a;">-</div>
+              <div style="font-size:11px; color:#475569; margin-top:2px;">الجوال: <b id="entry-stmt-phone">-</b></div>
+            </div>
+            <div style="text-align:left;">
+              <span style="font-size:10px; color:#64748b; font-weight:700;">الرصيد المتبقي</span>
+              <div id="entry-stmt-net" style="font-size:17px; font-weight:900; color:#dc2626;">0 ريال</div>
+            </div>
+          </div>
+
+          <div class="stats-grid" style="grid-template-columns: repeat(3, 1fr);">
+            <div class="stat-card stat-amber" style="padding:8px;"><span class="label">عليه</span><span id="entry-stmt-debit" class="val" style="font-size:14px;">0</span></div>
+            <div class="stat-card stat-green" style="padding:8px;"><span class="label">له</span><span id="entry-stmt-credit" class="val" style="font-size:14px;">0</span></div>
+            <div class="stat-card stat-blue" style="padding:8px;"><span class="label">المتبقي</span><span id="entry-stmt-rem" class="val" style="font-size:14px;">0</span></div>
+          </div>
+
+          <div style="overflow-x:auto;">
+            <table>
+              <thead>
+                <tr>
+                  <th>التاريخ</th>
+                  <th>البيان</th>
+                  <th>عليه</th>
+                  <th>له</th>
+                </tr>
+              </thead>
+              <tbody id="entry-stmt-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- 1. شاشة الملخص العام -->
-    <div id="view-summary">
+    <div id="view-summary" class="hidden">
       <div class="stats-grid">
         <div class="stat-card"><span class="label">إجمالي المشتركين</span><span id="stat-cust-count" class="val">0</span></div>
         <div class="stat-card stat-amber"><span class="label">إجمالي الحساب (عليهم)</span><span id="stat-total-debit" class="val">0</span></div>
@@ -129,8 +531,15 @@
       </div>
 
       <div class="card" style="margin-top: 12px;">
-        <div style="display: flex; justify-content: space-between; gap: 10px; margin-bottom: 12px; flex-wrap: wrap;">
-          <input type="text" id="global-search" oninput="renderSummaryTable()" placeholder="🔍 ابحث بالاسم أو برقم الجوال..." style="padding: 7px 12px; border: 1px solid #cbd5e1; border-radius: 8px; width: 280px; font-size: 12px;">
+        <div style="display: flex; justify-content: space-between; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; align-items: center;">
+          <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+            <input type="text" id="global-search" oninput="renderSummaryTable()" placeholder="🔍 ابحث بالاسم أو برقم الجوال..." style="padding: 7px 12px; border: 1px solid #cbd5e1; border-radius: 8px; width: 250px; font-size: 12px;">
+            <div class="filter-pills">
+              <button type="button" id="flt-all" class="filter-pill-btn active" onclick="setSummaryBalanceFilter('all', this)">الكل</button>
+              <button type="button" id="flt-debtors" class="filter-pill-btn" onclick="setSummaryBalanceFilter('debtors', this)">عليهم متبقي</button>
+              <button type="button" id="flt-settled" class="filter-pill-btn" onclick="setSummaryBalanceFilter('settled', this)">خالصين (0 أو له)</button>
+            </div>
+          </div>
           <div>
             <label style="font-size: 12px; font-weight: 700;">الترتيب: </label>
             <select id="sort-order" onchange="renderSummaryTable()" style="padding: 6px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 12px;">
@@ -161,47 +570,8 @@
     </div>
 
     <!-- 2. كشف الحساب الفردي -->
-    <div id="view-detail" class="grid-detail hidden">
-      <div class="card">
-        <h3 style="font-size: 14px; font-weight: 800; border-bottom: 1px solid #e2e8f0; padding-bottom: 6px; margin-bottom: 10px;">➕ تسجيل حركة جديدة</h3>
-        
-        <div class="form-group">
-          <label>اسم المشترك / العميل</label>
-          <input type="text" id="cust-name" list="customer-list" oninput="autoFillPhone()" placeholder="اكتب أو اختر اسماً...">
-          <datalist id="customer-list"></datalist>
-        </div>
-
-        <div class="form-group">
-          <label>رقم الجوال (واتساب)</label>
-          <input type="text" id="cust-phone" placeholder="مثال: 777000000">
-        </div>
-
-        <div class="form-group">
-          <label>نوع العملية</label>
-          <select id="trans-type">
-            <option value="debit">🔴 عليه (كروت / باقات / قيد دين)</option>
-            <option value="credit">🟢 له / واصل (تسديد نقداً)</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label>المبلغ (ريال)</label>
-          <input type="number" id="trans-amount" placeholder="0.00">
-        </div>
-
-        <div class="form-group">
-          <label>التاريخ</label>
-          <input type="date" id="trans-date">
-        </div>
-
-        <div class="form-group">
-          <label>البيان / تفاصيل</label>
-          <input type="text" id="trans-note" placeholder="مثلاً: كروت فئة 1000، دفعة نقدية...">
-        </div>
-
-        <button onclick="addTransaction()" class="btn btn-blue" style="width: 100%; justify-content: center; padding: 9px; font-size: 13px;">حفظ الحركة في الحساب</button>
-      </div>
-
+    <div id="view-detail" class="hidden" style="display: flex; flex-direction: column; gap: 12px;">
+      <datalist id="customer-list"></datalist>
       <div style="display: flex; flex-direction: column; gap: 12px;">
         <div class="card no-print" style="display: flex; justify-content: space-between; align-items: center; padding: 10px 14px;">
           <div style="display: flex; align-items: center; gap: 8px; flex: 1;">
@@ -235,6 +605,14 @@
               </div>
             </div>
 
+            <div id="det-last-tx-alert" class="last-tx-banner">آخر حركة: -</div>
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; font-size:11px; font-weight:800; color:#475569;">
+              <span>ترتيب حركات الكشف:</span>
+              <select id="det-sort-order" onchange="renderCustomerDetails()" style="padding:4px 8px; border:1px solid #cbd5e1; border-radius:6px; font-size:11px; font-weight:700;">
+                <option value="asc">من الأقدم إلى الأحدث</option>
+                <option value="desc">من الأحدث إلى الأقدم</option>
+              </select>
+            </div>
             <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 12px 16px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
               <div>
                 <span style="font-size: 11px; color: #64748b;">المشترك:</span>
@@ -273,7 +651,7 @@
               <button onclick="copyDetailedText()" class="btn btn-gray">📋 نسخ مفصل</button>
               <button onclick="copySummaryText()" class="btn btn-gray" style="background: #0284c7; color: #fff;">📋 نسخ الإجمالي فقط</button>
               <button onclick="exportAsImage()" class="btn btn-gray">🖼️ حفظ صورة</button>
-              <button onclick="window.print()" class="btn btn-blue">🖨️ طباعة / PDF</button>
+              <button onclick="saveStatementPDF()" class="btn btn-blue">📄 حفظ PDF</button>
             </div>
           </div>
         </div>
@@ -288,8 +666,105 @@
     let telegramChatId = localStorage.getItem('naif_net_tg_chatid') || '';
     let activeCustomer = null;
 
-    document.getElementById('trans-date').valueAsDate = new Date();
+    const _td = document.getElementById('trans-date'); if (_td) _td.valueAsDate = new Date();
     document.getElementById('report-date').innerText = new Date().toLocaleDateString('ar-YE');
+
+    function updateLiveClock() {
+      const now = new Date();
+      const dateStr = now.toLocaleDateString('ar-YE', { year: 'numeric', month: '2-digit', day: '2-digit' });
+      const timeStr = now.toLocaleTimeString('ar-YE', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      const el = document.getElementById('live-datetime');
+      if (el) el.innerText = `📅 ${dateStr} | 🕒 ${timeStr}`;
+    }
+
+    function updateAppStatusBadge() {
+      const badge = document.getElementById('app-run-status');
+      if (!badge) return;
+      if (navigator.onLine) {
+        badge.classList.remove('offline');
+        badge.innerText = '🟢 التطبيق شغال (متصل)';
+      } else {
+        badge.classList.add('offline');
+        badge.innerText = '🟡 التطبيق شغال (وضع أوفلاين)';
+      }
+    }
+
+    setInterval(updateLiveClock, 1000);
+    window.addEventListener('online', updateAppStatusBadge);
+    window.addEventListener('offline', updateAppStatusBadge);
+
+    function openUnifiedPanel(initialTab = 'settings') {
+      document.getElementById('modal-cloud-url').value = cloudURL;
+      document.getElementById('modal-tg-token').value = telegramToken;
+      document.getElementById('modal-tg-chatid').value = telegramChatId;
+      switchModalTab(initialTab);
+      document.getElementById('instructions-modal').classList.remove('hidden');
+    }
+
+    function toggleInstructionsModal() {
+      const modal = document.getElementById('instructions-modal');
+      if (modal.classList.contains('hidden')) {
+        openUnifiedPanel('settings');
+      } else {
+        modal.classList.add('hidden');
+      }
+    }
+
+    function switchModalTab(tab) {
+      document.getElementById('m-body-settings').classList.toggle('hidden', tab !== 'settings');
+      document.getElementById('m-body-google').classList.toggle('hidden', tab !== 'google');
+      document.getElementById('m-body-telegram').classList.toggle('hidden', tab !== 'telegram');
+      document.getElementById('m-tab-settings').classList.toggle('active', tab === 'settings');
+      document.getElementById('m-tab-google').classList.toggle('active', tab === 'google');
+      document.getElementById('m-tab-telegram').classList.toggle('active', tab === 'telegram');
+    }
+
+    function saveUnifiedSettings() {
+      cloudURL = document.getElementById('modal-cloud-url').value.trim();
+      telegramToken = document.getElementById('modal-tg-token').value.trim();
+      telegramChatId = document.getElementById('modal-tg-chatid').value.trim();
+      localStorage.setItem('naif_net_cloud_url', cloudURL);
+      localStorage.setItem('naif_net_tg_token', telegramToken);
+      localStorage.setItem('naif_net_tg_chatid', telegramChatId);
+      notify('✅ تم حفظ إعدادات السحابة وتيليجرام بنجاح!', '#059669');
+    }
+
+    function copyGasCode() {
+      const preEl = document.getElementById('gas-source-code');
+      const code = preEl ? (preEl.textContent || preEl.innerText) : '';
+      if (!code) return;
+      if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+        navigator.clipboard.writeText(code).then(() => {
+          alert('✅ تم نسخ كود Google Apps Script بالكامل!');
+        }).catch(() => fallbackCopyText(code));
+      } else {
+        fallbackCopyText(code);
+      }
+    }
+
+    function fallbackCopyText(text, successMsg = '✅ تم نسخ كود Google Apps Script بالكامل!') {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.top = '0';
+      ta.style.left = '0';
+      ta.style.opacity = '0.01';
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      ta.setSelectionRange(0, text.length);
+      try {
+        const ok = document.execCommand('copy');
+        if (ok) {
+          alert(successMsg);
+        } else {
+          alert('تعذر النسخ التلقائي، يمكنك تحديد النص ونسخه يدوياً.');
+        }
+      } catch (e) {
+        alert('تعذر النسخ التلقائي، يمكنك تحديد النص ونسخه يدوياً.');
+      }
+      document.body.removeChild(ta);
+    }
 
     function notify(text, color = '#2563eb') {
       const el = document.getElementById('status-bar');
@@ -328,7 +803,7 @@
 
     async function backupToTelegram() {
       if (!telegramToken || !telegramChatId) {
-        configureTelegram();
+        openUnifiedPanel('settings');
         return;
       }
 
@@ -395,7 +870,7 @@
 
     async function syncWithCloud() {
       if (!cloudURL) {
-        configureCloudURL();
+        openUnifiedPanel('settings');
         return;
       }
       notify('جاري فحص المزامنة مع السحابة... ⏳');
@@ -447,12 +922,18 @@
     }
 
     function showView(v) {
+      const entryEl = document.getElementById('view-entry');
+      if (entryEl) entryEl.classList.toggle('hidden', v !== 'entry');
       document.getElementById('view-summary').classList.toggle('hidden', v !== 'summary');
       document.getElementById('view-detail').classList.toggle('hidden', v !== 'detail');
+
+      const entryTab = document.getElementById('tab-btn-entry');
+      if (entryTab) entryTab.classList.toggle('active', v === 'entry');
       document.getElementById('tab-btn-summary').classList.toggle('active', v === 'summary');
       document.getElementById('tab-btn-detail').classList.toggle('active', v === 'detail');
+
       if (v === 'summary') renderSummaryTable();
-      else if (activeCustomer && ledger[activeCustomer]) renderCustomerDetails();
+      else if (v === 'detail' && activeCustomer && ledger[activeCustomer]) renderCustomerDetails();
     }
 
     function updateDropdowns() {
@@ -530,6 +1011,10 @@
       }
 
       activeCustomer = name;
+      const entryEl = document.getElementById('view-entry');
+      if (entryEl) entryEl.classList.add('hidden');
+      const entryTab = document.getElementById('tab-btn-entry');
+      if (entryTab) entryTab.classList.remove('active');
       document.getElementById('view-summary').classList.add('hidden');
       document.getElementById('view-detail').classList.remove('hidden');
       document.getElementById('tab-btn-summary').classList.remove('active');
@@ -549,7 +1034,17 @@
       document.getElementById('det-cust-name').innerText = activeCustomer;
       document.getElementById('det-cust-phone').innerText = data.phone || 'غير مسجل';
 
-      const list = [...data.transactions].sort((a, b) => new Date(a.date) - new Date(b.date));
+      const chronAsc = [...data.transactions].sort((a, b) => new Date(a.date) - new Date(b.date) || a.id - b.id);
+      const lastTx = chronAsc.length ? chronAsc[chronAsc.length - 1] : null;
+      const alertEl = document.getElementById('det-last-tx-alert');
+      if (alertEl) {
+        alertEl.innerText = lastTx
+          ? `آخر حركة: ${lastTx.date} | ${lastTx.note} (${lastTx.amount.toLocaleString()} ريال - ${lastTx.type === 'debit' ? 'عليه' : 'له'})`
+          : 'لا توجد حركات مسجلة لهذا العميل';
+      }
+      const detSortEl = document.getElementById('det-sort-order');
+      const detSort = detSortEl ? detSortEl.value : 'asc';
+      const list = detSort === 'desc' ? [...chronAsc].reverse() : chronAsc;
       let totalDebit = 0, totalCredit = 0;
       const tbody = document.getElementById('det-table-body');
       tbody.innerHTML = '';
@@ -589,15 +1084,20 @@
       tbody.innerHTML = '';
 
       let list = Object.keys(ledger).map(name => {
-        const c = ledger[name];
+        const c = ledger[name] || {};
+        const txs = Array.isArray(c.transactions) ? c.transactions : [];
         let d = 0, cr = 0, last = '2000-01-01';
-        c.transactions.forEach(t => {
-          if (t.type === 'debit') d += t.amount; else cr += t.amount;
-          if (t.date > last) last = t.date;
+        txs.forEach(t => {
+          if (!t) return;
+          const amt = Number(t.amount) || 0;
+          if (t.type === 'debit') d += amt; else cr += amt;
+          if (t.date && t.date > last) last = t.date;
         });
-        return { name, phone: c.phone || '', debit: d, credit: cr, net: d - cr, last: c.transactions.length ? last : '-' };
+        return { name, phone: c.phone || '', debit: d, credit: cr, net: d - cr, last: txs.length ? last : '-' };
       });
 
+      if (summaryBalanceFilter === 'debtors') list = list.filter(i => i.net > 0);
+      else if (summaryBalanceFilter === 'settled') list = list.filter(i => i.net <= 0);
       if (q) list = list.filter(i => i.name.toLowerCase().includes(q) || i.phone.includes(q));
       if (sort === 'date-desc') list.sort((a,b) => b.last.localeCompare(a.last));
       else if (sort === 'balance-desc') list.sort((a,b) => b.net - a.net);
@@ -716,16 +1216,29 @@
       return msg;
     }
 
+    function copyPlainText(text, successMsg) {
+      if (!text) return;
+      if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+        navigator.clipboard.writeText(text).then(() => {
+          alert(successMsg);
+        }).catch(() => {
+          fallbackCopyText(text, successMsg);
+        });
+      } else {
+        fallbackCopyText(text, successMsg);
+      }
+    }
+
     function copyDetailedText() {
       const msg = generateDetailedText();
       if (!msg) return;
-      navigator.clipboard.writeText(msg).then(() => alert('✅ تم نسخ كشف الحساب بالتفصيل مع الوقت!'));
+      copyPlainText(msg, '✅ تم نسخ كشف الحساب بالتفصيل مع الوقت!');
     }
 
     function copySummaryText() {
       const msg = generateSummaryText();
       if (!msg) return;
-      navigator.clipboard.writeText(msg).then(() => alert('✅ تم نسخ الإجمالي المتبقي فقط مع الوقت!'));
+      copyPlainText(msg, '✅ تم نسخ الإجمالي المتبقي فقط مع الوقت!');
     }
 
     // دالة سؤال المستخدم عند الضغط على إرسال واتساب (مفصل أو إجمالي فقط)
@@ -776,12 +1289,589 @@
       });
     }
 
+    let summaryBalanceFilter = 'all';
+
     // التشغيل المبدئي للواجهة
+    updateLiveClock();
+    updateAppStatusBadge();
     updateDropdowns();
     renderSummaryTable();
     if (cloudURL) {
       syncWithCloud();
     }
+
+    document.getElementById('entry-trans-date').valueAsDate = new Date();
+    if (typeof onEntryModeChange === 'function') onEntryModeChange();
+
+    function setSummaryBalanceFilter(mode, btnEl) {
+      summaryBalanceFilter = mode;
+      document.querySelectorAll('.filter-pill-btn').forEach(b => b.classList.remove('active'));
+      if (btnEl) btnEl.classList.add('active');
+      renderSummaryTable();
+    }
+
+    function onEntryCustomerChange() {
+      const name = (document.getElementById('entry-cust-name').value || '').trim();
+      if (ledger[name] && ledger[name].phone) {
+        document.getElementById('entry-cust-phone').value = ledger[name].phone;
+      }
+      updateEntryInstantBalance();
+      if (name && ledger[name]) {
+        renderEntryLeftStatement(name);
+      }
+    }
+
+    function updateEntryInstantBalance() {
+      const name = (document.getElementById('entry-cust-name').value || '').trim();
+      const box = document.getElementById('entry-instant-balance');
+      if (!box) return;
+      if (!name || !ledger[name]) {
+        box.style.display = 'none';
+        return;
+      }
+      const txList = [...(ledger[name].transactions || [])].sort((a, b) => new Date(a.date) - new Date(b.date) || a.id - b.id);
+      let d = 0, cr = 0;
+      txList.forEach(t => {
+        if (t.type === 'debit') d += Number(t.amount) || 0;
+        else cr += Number(t.amount) || 0;
+      });
+      const net = d - cr;
+      document.getElementById('entry-bal-debit').innerText = d.toLocaleString() + ' ريال';
+      document.getElementById('entry-bal-credit').innerText = cr.toLocaleString() + ' ريال';
+      document.getElementById('entry-bal-net').innerText = net.toLocaleString() + ' ريال';
+      const lastTx = txList.length ? txList[txList.length - 1] : null;
+      document.getElementById('entry-last-move').innerText = lastTx
+        ? `آخر حركة: ${lastTx.date} — ${lastTx.note} (${Number(lastTx.amount || 0).toLocaleString()} ريال)`
+        : 'آخر حركة: لا توجد حركات سابقة';
+      box.style.display = 'flex';
+    }
+
+    function applyQuickPreset(noteText, amountVal, typeVal) {
+      const noteIn = document.getElementById('entry-trans-note');
+      const amtIn = document.getElementById('entry-trans-amount');
+      const typeIn = document.getElementById('entry-trans-type');
+      const ch = document.getElementById('entry-payment-channel').value;
+      if (typeIn && typeVal) typeIn.value = typeVal;
+      if (noteIn) noteIn.value = `${noteText} (${ch})`;
+      if (amtIn && amountVal !== '') amtIn.value = amountVal;
+      if (amtIn && amountVal === '') amtIn.focus();
+    }
+
+    function addDetailVoucherLine(desc = '', qty = '', price = '') {
+      const wrap = document.getElementById('detail-voucher-lines');
+      if (!wrap) return;
+      const row = document.createElement('div');
+      row.className = 'voucher-line-row';
+      row.innerHTML = `
+        <input type="text" class="dv-desc" value="${String(desc).replace(/"/g, '&quot;')}" placeholder="الصنف / البيان" oninput="calcDetailsVoucher()">
+        <input type="number" step="any" min="0" class="dv-qty" value="${qty}" placeholder="العدد" oninput="calcDetailsVoucher()" style="text-align:center;">
+        <input type="number" step="any" min="0" class="dv-price" value="${price}" placeholder="السعر" oninput="calcDetailsVoucher()" style="text-align:center;">
+        <span class="dv-sub" style="font-weight:900; color:#1e3a8a; text-align:center;">0</span>
+        <button type="button" onclick="this.parentElement.remove(); calcDetailsVoucher();" style="border:none; background:none; color:#dc2626; font-weight:900; cursor:pointer;">✕</button>
+      `;
+      wrap.appendChild(row);
+      calcDetailsVoucher();
+    }
+
+    function onEntryModeChange() {
+      const mode = document.getElementById('entry-mode').value;
+      const cardsPanel = document.getElementById('entry-cards-panel');
+      const detailsPanel = document.getElementById('entry-details-panel');
+      const typeSel = document.getElementById('entry-trans-type');
+      const noteIn = document.getElementById('entry-trans-note');
+      const ch = document.getElementById('entry-payment-channel').value;
+
+      cardsPanel.classList.toggle('open', mode === 'cards');
+      const quickCardsSec = document.getElementById('entry-quick-cards-section');
+      if (quickCardsSec) {
+        quickCardsSec.style.display = mode === 'cards' ? 'block' : 'none';
+      }
+      detailsPanel.classList.toggle('open', mode === 'details');
+
+      if (mode === 'normal_debit') {
+        if (typeSel) typeSel.value = 'debit';
+      } else if (mode === 'normal_credit') {
+        if (typeSel) typeSel.value = 'credit';
+        if (noteIn && !noteIn.value.trim()) noteIn.value = `دفعة / تسديد (${ch})`;
+      } else if (mode === 'cards') {
+        if (typeSel) typeSel.value = 'debit';
+        onCardPresetChange();
+      } else if (mode === 'details') {
+        if (typeSel) typeSel.value = 'debit';
+        const wrap = document.getElementById('detail-voucher-lines');
+        if (wrap && wrap.children.length === 0) addDetailVoucherLine();
+        calcDetailsVoucher();
+      } else if (mode === 'settled') {
+        if (typeSel) typeSel.value = 'credit';
+        if (noteIn && !noteIn.value.trim()) noteIn.value = `تسديد مسدد (${ch})`;
+      }
+    }
+
+    function onCardPresetChange() {
+      const sel = document.getElementById('card-preset-select');
+      const priceInp = document.getElementById('card-unit-price');
+      if (!sel || !priceInp) return;
+      const parts = sel.value.split('|');
+      if (parts[0] === 'custom') {
+        priceInp.readOnly = false;
+        priceInp.style.background = '#ffffff';
+        priceInp.value = '';
+        priceInp.focus();
+      } else {
+        priceInp.readOnly = true;
+        priceInp.style.background = '#f1f5f9';
+        priceInp.value = parseFloat(parts[0]) || 0;
+      }
+      calcCardsVoucher();
+    }
+
+    function calcCardsVoucher() {
+      const sel = document.getElementById('card-preset-select');
+      const priceInp = document.getElementById('card-unit-price');
+      const qtyInp = document.getElementById('card-qty');
+      const amtIn = document.getElementById('entry-trans-amount');
+      const noteIn = document.getElementById('entry-trans-note');
+      const ch = document.getElementById('entry-payment-channel').value;
+
+      const parts = sel ? sel.value.split('|') : ['100', 'كروت فئة 100 ريال'];
+      const itemLabel = parts[0] === 'custom' ? 'كروت' : parts[1];
+      const unitPrice = parseFloat(priceInp.value) || 0;
+      const qty = parseFloat(qtyInp.value) || 0;
+      const total = unitPrice * qty;
+
+      document.getElementById('card-calc-total').innerText = `${total.toLocaleString()} ريال`;
+      amtIn.value = total > 0 ? total : '';
+      if (qty > 0) {
+        noteIn.value = `${itemLabel} | عدد ${qty} × ${unitPrice.toLocaleString()} = ${total.toLocaleString()} (${ch})`;
+      }
+    }
+
+    function calcDetailsVoucher() {
+      let sum = 0;
+      const parts = [];
+      const ch = document.getElementById('entry-payment-channel').value;
+      document.querySelectorAll('#detail-voucher-lines .voucher-line-row').forEach(row => {
+        const d = row.querySelector('.dv-desc').value.trim();
+        const q = parseFloat(row.querySelector('.dv-qty').value) || 0;
+        const p = parseFloat(row.querySelector('.dv-price').value) || 0;
+        const sub = q * p;
+        row.querySelector('.dv-sub').innerText = sub.toLocaleString();
+        if (d || q || p) {
+          sum += sub;
+          parts.push(`${d || 'بند'} (${q}×${p.toLocaleString()})`);
+        }
+      });
+      document.getElementById('detail-calc-total').innerText = `${sum.toLocaleString()} ريال`;
+      const amtIn = document.getElementById('entry-trans-amount');
+      const noteIn = document.getElementById('entry-trans-note');
+      if (sum > 0) amtIn.value = sum;
+      if (parts.length > 0) noteIn.value = `فاتورة تفاصيل: ${parts.join('، ')} (${ch})`;
+    }
+
+    function syncChannelToNote() {
+      const mode = document.getElementById('entry-mode').value;
+      if (mode === 'cards') calcCardsVoucher();
+      else if (mode === 'details') calcDetailsVoucher();
+    }
+
+    let lastEntryStatementCustomer = '';
+
+    function renderEntryLeftStatement(custName) {
+      const targetName = (custName || lastEntryStatementCustomer || '').trim();
+      const emptyEl = document.getElementById('entry-stmt-empty');
+      const bodyEl = document.getElementById('entry-stmt-body');
+      const openFullBtn = document.getElementById('entry-open-full-stmt-btn');
+      if (!emptyEl || !bodyEl) return;
+
+      if (!targetName || !ledger[targetName]) {
+        emptyEl.classList.remove('hidden');
+        bodyEl.classList.add('hidden');
+        if (openFullBtn) openFullBtn.classList.add('hidden');
+        return;
+      }
+
+      lastEntryStatementCustomer = targetName;
+      const data = ledger[targetName];
+      const txs = Array.isArray(data.transactions) ? [...data.transactions] : [];
+      txs.sort((a, b) => new Date(a.date) - new Date(b.date) || (a.id || 0) - (b.id || 0));
+
+      let d = 0, cr = 0;
+      const tbody = document.getElementById('entry-stmt-tbody');
+      tbody.innerHTML = '';
+
+      txs.forEach(t => {
+        if (!t) return;
+        const amt = Number(t.amount) || 0;
+        const isDebit = t.type === 'debit';
+        if (isDebit) d += amt;
+        else cr += amt;
+        tbody.innerHTML += `
+          <tr>
+            <td>${t.date || '-'}</td>
+            <td style="font-weight:700;">${t.note || '-'}</td>
+            <td style="font-weight:700; color:${isDebit ? '#b45309' : '#cbd5e1'};">${isDebit ? amt.toLocaleString() : '-'}</td>
+            <td style="font-weight:700; color:${!isDebit ? '#047857' : '#cbd5e1'};">${!isDebit ? amt.toLocaleString() : '-'}</td>
+          </tr>
+        `;
+      });
+
+      const net = d - cr;
+      document.getElementById('entry-stmt-name').innerText = targetName;
+      document.getElementById('entry-stmt-phone').innerText = data.phone || 'غير مسجل';
+      document.getElementById('entry-stmt-debit').innerText = d.toLocaleString() + ' ريال';
+      document.getElementById('entry-stmt-credit').innerText = cr.toLocaleString() + ' ريال';
+      document.getElementById('entry-stmt-rem').innerText = net.toLocaleString() + ' ريال';
+
+      const netEl = document.getElementById('entry-stmt-net');
+      netEl.innerText = net.toLocaleString() + ' ريال';
+      netEl.style.color = net > 0 ? '#dc2626' : (net < 0 ? '#047857' : '#334155');
+
+      emptyEl.classList.add('hidden');
+      bodyEl.classList.remove('hidden');
+      if (openFullBtn) openFullBtn.classList.remove('hidden');
+    }
+
+    function jumpToFullStatement() {
+      if (lastEntryStatementCustomer && ledger[lastEntryStatementCustomer]) {
+        openCustomer(lastEntryStatementCustomer);
+      } else {
+        showView('detail');
+      }
+    }
+
+    function addTransactionFromFirstTab() {
+      const mode = document.getElementById('entry-mode').value;
+      if (mode === 'cards') calcCardsVoucher();
+      else if (mode === 'details') calcDetailsVoucher();
+
+      const nameIn = document.getElementById('entry-cust-name');
+      const phoneIn = document.getElementById('entry-cust-phone');
+      const typeIn = document.getElementById('entry-trans-type');
+      const amountIn = document.getElementById('entry-trans-amount');
+      const dateIn = document.getElementById('entry-trans-date');
+      const noteIn = document.getElementById('entry-trans-note');
+      const ch = document.getElementById('entry-payment-channel').value;
+
+      const name = (nameIn.value || '').trim();
+      const phone = (phoneIn.value || '').trim();
+      const type = typeIn.value;
+      const amount = parseFloat(amountIn.value);
+      const date = dateIn.value || new Date().toISOString().slice(0, 10);
+      const defaultNote = type === 'debit' ? `قيد كروت / باقات (${ch})` : `دفعة نقدية (${ch})`;
+      const note = (noteIn.value || '').trim() || defaultNote;
+
+      if (!name || isNaN(amount) || amount <= 0 || !date) {
+        alert('يرجى كتابة اسم العميل وتحديد المبلغ والتاريخ بصورة صحيحة');
+        return;
+      }
+
+      if (!ledger[name]) {
+        ledger[name] = { phone: phone || '', transactions: [] };
+      } else if (phone) {
+        ledger[name].phone = phone;
+      }
+
+      ledger[name].transactions.push({
+        id: Date.now(),
+        date,
+        type,
+        amount,
+        note
+      });
+
+      saveState();
+
+      lastEntryStatementCustomer = name;
+      renderEntryLeftStatement(name);
+      notify(`✅ تم حفظ الحركة في حساب "${name}" وتحديث كشف الحساب باليسار!`, '#059669');
+
+      nameIn.value = '';
+      phoneIn.value = '';
+      amountIn.value = '';
+      noteIn.value = '';
+      dateIn.valueAsDate = new Date();
+      const cq = document.getElementById('card-qty');
+      if (cq) cq.value = '';
+      const ct = document.getElementById('card-calc-total');
+      if (ct) ct.innerText = '0 ريال';
+      const dWrap = document.getElementById('detail-voucher-lines');
+      if (dWrap && mode === 'details') {
+        dWrap.innerHTML = '';
+        addDetailVoucherLine();
+      }
+      const dt = document.getElementById('detail-calc-total');
+      if (dt) dt.innerText = '0 ريال';
+      updateEntryInstantBalance();
+      nameIn.focus();
+    }
+
+
+    let cardDenominations = JSON.parse(localStorage.getItem('naif_net_card_denoms')) || [
+      { name: 'كروت فئة 100 ريال', price: 100 },
+      { name: 'كروت فئة 200 ريال', price: 200 },
+      { name: 'كروت فئة 250 ريال', price: 250 },
+      { name: 'كروت فئة 300 ريال', price: 300 },
+      { name: 'كروت فئة 500 ريال', price: 500 }
+    ];
+
+    function saveCardDenominations() {
+      localStorage.setItem('naif_net_card_denoms', JSON.stringify(cardDenominations));
+      renderCardDenominationsUI();
+    }
+
+    function toggleAddCardDenomBox() {
+      const box = document.getElementById('add-card-denom-box');
+      if (!box) return;
+      box.classList.toggle('hidden');
+      if (!box.classList.contains('hidden')) {
+        const lbl = document.getElementById('new-card-label');
+        if (lbl) lbl.focus();
+      }
+    }
+
+    function saveNewCardDenomination() {
+      const lblIn = document.getElementById('new-card-label');
+      const prcIn = document.getElementById('new-card-price');
+      const name = (lblIn.value || '').trim();
+      const price = parseFloat(prcIn.value);
+      if (!name || isNaN(price) || price <= 0) {
+        alert('يرجى إدخال اسم الفئة وسعر صحيح أكبر من صفر');
+        return;
+      }
+      const existingIdx = cardDenominations.findIndex(item => item.name === name);
+      if (existingIdx !== -1) {
+        cardDenominations[existingIdx].price = price;
+      } else {
+        cardDenominations.push({ name, price });
+      }
+      lblIn.value = '';
+      prcIn.value = '';
+      saveCardDenominations();
+      selectCardDenomByPrice(name, price);
+    }
+
+    function deleteCardDenomination(idx) {
+      if (cardDenominations.length <= 1) {
+        alert('يجب الإبقاء على فئة واحدة على الأقل');
+        return;
+      }
+      cardDenominations.splice(idx, 1);
+      saveCardDenominations();
+    }
+
+    function selectCardDenomByPrice(name, price) {
+      const presetSel = document.getElementById('card-preset-select');
+      const unitInp = document.getElementById('card-unit-price');
+      const qtyInp = document.getElementById('card-qty');
+      if (presetSel) {
+        const matchedOpt = Array.from(presetSel.options).find(opt => {
+          const p = opt.value.split('|');
+          return parseFloat(p[0]) === Number(price) || p[1] === name;
+        });
+        if (matchedOpt) {
+          presetSel.value = matchedOpt.value;
+          if (unitInp) {
+            unitInp.readOnly = true;
+            unitInp.style.background = '#f1f5f9';
+            unitInp.value = Number(price);
+          }
+        } else {
+          presetSel.value = 'custom|صنف مخصص';
+          if (unitInp) {
+            unitInp.readOnly = false;
+            unitInp.style.background = '#ffffff';
+            unitInp.value = Number(price);
+          }
+        }
+      }
+      if (qtyInp && !qtyInp.value) qtyInp.value = 1;
+      calcCardsVoucher();
+    }
+
+    function renderCardDenominationsUI() {
+      const chipsWrap = document.getElementById('quick-cards-chips');
+      const presetSel = document.getElementById('card-preset-select');
+      if (chipsWrap) {
+        chipsWrap.innerHTML = '';
+        cardDenominations.forEach((item, idx) => {
+          const chip = document.createElement('span');
+          chip.className = 'quick-preset-btn';
+          chip.style.display = 'inline-flex';
+          chip.style.alignItems = 'center';
+          chip.style.gap = '6px';
+
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.style.background = 'none';
+          btn.style.border = 'none';
+          btn.style.color = 'inherit';
+          btn.style.font = 'inherit';
+          btn.style.cursor = 'pointer';
+          btn.innerText = `${item.name} (${Number(item.price).toLocaleString()})`;
+          btn.onclick = () => selectCardDenomByPrice(item.name, item.price);
+
+          const delBtn = document.createElement('button');
+          delBtn.type = 'button';
+          delBtn.title = 'حذف الفئة';
+          delBtn.style.background = 'none';
+          delBtn.style.border = 'none';
+          delBtn.style.color = '#dc2626';
+          delBtn.style.fontWeight = '900';
+          delBtn.style.cursor = 'pointer';
+          delBtn.innerText = '✕';
+          delBtn.onclick = (e) => {
+            e.stopPropagation();
+            deleteCardDenomination(idx);
+          };
+
+          chip.appendChild(btn);
+          chip.appendChild(delBtn);
+          chipsWrap.appendChild(chip);
+        });
+      }
+
+      if (presetSel) {
+        const prevVal = presetSel.value;
+        presetSel.innerHTML = '';
+        cardDenominations.forEach(item => {
+          const opt = document.createElement('option');
+          opt.value = `${item.price}|${item.name}`;
+          opt.textContent = `${item.name} (${Number(item.price).toLocaleString()})`;
+          presetSel.appendChild(opt);
+        });
+        const customOpt = document.createElement('option');
+        customOpt.value = 'custom|صنف مخصص';
+        customOpt.textContent = 'صنف مخصص...';
+        presetSel.appendChild(customOpt);
+
+        if (Array.from(presetSel.options).some(o => o.value === prevVal)) {
+          presetSel.value = prevVal;
+        } else if (presetSel.options.length > 0) {
+          presetSel.selectedIndex = 0;
+        }
+      }
+    }
+
+    renderCardDenominationsUI();
+
+
+    function getFormattedDateAndTimeParts(d = new Date()) {
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const dd = String(d.getDate()).padStart(2, '0');
+      const HH = String(d.getHours()).padStart(2, '0');
+      const MM = String(d.getMinutes()).padStart(2, '0');
+      const SS = String(d.getSeconds()).padStart(2, '0');
+      return {
+        datePart: `${yyyy}-${mm}-${dd}`,
+        timePart: `${HH}-${MM}-${SS}`,
+        fullStamp: `${yyyy}-${mm}-${dd}_${HH}-${MM}-${SS}`
+      };
+    }
+
+    function downloadBackupToDevice() {
+      const stamp = getFormattedDateAndTimeParts(new Date()).fullStamp;
+      const fileName = `naif-net-backup-${stamp}.json`;
+      const jsonStr = JSON.stringify(ledger, null, 2);
+      const blob = new Blob([jsonStr], { type: 'application/json;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 1500);
+      notify(`✅ تم تحميل النسخة الاحتياطية للجوال: ${fileName}`, '#059669');
+    }
+
+    function buildSimplePdfBlob(lines) {
+      // Escape PDF literal string characters safely
+      const esc = (s) => String(s || '').replace(/\\/g, '\\\\').replace(/\(/g, '\\(').replace(/\)/g, '\\)').replace(/[^\x20-\x7E]/g, '?');
+      let y = 780;
+      const streamLines = ['BT', '/F1 13 Tf', '40 ' + y + ' Td'];
+      lines.forEach((line, idx) => {
+        if (idx > 0) {
+          y -= 20;
+          streamLines.push('0 -20 Td');
+        }
+        streamLines.push('(' + esc(line) + ') Tj');
+      });
+      streamLines.push('ET');
+      const streamContent = streamLines.join('\n');
+      const len = streamContent.length;
+
+      const objects = [
+        '1 0 obj << /Type /Catalog /Pages 2 0 R >> endobj',
+        '2 0 obj << /Type /Pages /Kids [3 0 R] /Count 1 >> endobj',
+        '3 0 obj << /Type /Page /Parent 2 0 R /MediaBox [0 0 612 842] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >> endobj',
+        '4 0 obj << /Type /Font /Subtype /Type1 /BaseFont /Helvetica >> endobj',
+        '5 0 obj << /Length ' + len + ' >> stream\n' + streamContent + '\nendstream endobj'
+      ];
+
+      let pdf = '%PDF-1.4\n';
+      const offsets = [0];
+      objects.forEach(obj => {
+        offsets.push(pdf.length);
+        pdf += obj + '\n';
+      });
+      const xrefStart = pdf.length;
+      pdf += 'xref\n0 ' + (objects.length + 1) + '\n';
+      pdf += '0000000000 65535 f \n';
+      for (let i = 1; i < offsets.length; i++) {
+        pdf += String(offsets[i]).padStart(10, '0') + ' 00000 n \n';
+      }
+      pdf += 'trailer << /Size ' + (objects.length + 1) + ' /Root 1 0 R >>\nstartxref\n' + xrefStart + '\n%%EOF';
+      return new Blob([pdf], { type: 'application/pdf' });
+    }
+
+    function saveStatementPDF() {
+      if (!activeCustomer || !ledger[activeCustomer]) {
+        alert('يرجى اختيار عميل أولاً لعرض كشف حسابه وحفظه PDF');
+        return;
+      }
+      const safeName = String(activeCustomer).trim().replace(/[\\/:*?"<>|]/g, '').replace(/\s+/g, '_') || 'Client';
+      const dateStr = getFormattedDateAndTimeParts(new Date()).datePart;
+      const baseTitle = `كشف_${safeName}_${dateStr}`;
+      const prevTitle = document.title;
+
+      // ضبط عنوان الصفحة باسم الشخص وتاريخ الحفظ قبل الطباعة/الحفظ كـ PDF
+      document.title = baseTitle;
+
+      // إنشاء ملف PDF حقيقي قابل للتحميل باسم الشخص وتاريخ الحفظ لتسهيل حفظه على الجوال
+      const c = ledger[activeCustomer];
+      let d = 0, cr = 0;
+      const txs = Array.isArray(c.transactions) ? c.transactions : [];
+      txs.forEach(t => { if (t.type === 'debit') d += Number(t.amount) || 0; else cr += Number(t.amount) || 0; });
+      const pdfLines = [
+        'NAIF.NET Wireless Network - Account Statement',
+        'Customer: ' + activeCustomer,
+        'Phone: ' + (c.phone || 'N/A'),
+        'Date: ' + dateStr,
+        'Total Debit: ' + d + ' | Total Credit: ' + cr + ' | Remaining: ' + (d - cr),
+        '------------------------------------------------------------'
+      ];
+      txs.forEach(t => {
+        pdfLines.push(`${t.date || ''} | ${t.type === 'debit' ? 'Debit' : 'Credit'} | ${Number(t.amount) || 0} | ${t.note || ''}`);
+      });
+
+      const pdfBlob = buildSimplePdfBlob(pdfLines);
+      const pdfUrl = URL.createObjectURL(pdfBlob);
+      const link = document.createElement('a');
+      link.href = pdfUrl;
+      link.download = `${baseTitle}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      setTimeout(() => URL.revokeObjectURL(pdfUrl), 1500);
+
+      // إتاحة نافذة الطباعة أيضاً بنفس اسم المستند
+      setTimeout(() => {
+        window.print();
+        document.title = prevTitle;
+      }, 250);
+    }
+
   </script>
 </body>
 </html>
