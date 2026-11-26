@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>نظام الحسابات - شبكة نائف نت اللاسلكية</title>
-  
+
   <!-- إعدادات تطبيق الويب التقدمي PWA -->
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#1e3a8a">
@@ -111,7 +111,6 @@
       gap: 12px;
     }
 
-
     .instant-balance-card {
       background: #f0f9ff; border: 1px solid #7dd3fc; border-radius: 8px;
       padding: 8px 10px; margin-bottom: 10px; font-size: 11px; font-weight: 800; color: #0c4a6e;
@@ -154,7 +153,6 @@
       background: #fffbeb; border: 1px solid #fde68a; color: #92400e;
       border-radius: 8px; padding: 7px 12px; font-size: 11px; font-weight: 800;
     }
-
 
     /* نافذة التعليمات المنبثقة (Modal) حتى لا تزحم الشاشة */
     .modal-backdrop {
@@ -248,7 +246,7 @@
 
 function doGet(e) {
   var sheet = getOrCreateSheet();
-  
+
   // حفظ عبر GET
   if (e && e.parameter && e.parameter.save_data) {
     sheet.getRange(1, 1).setValue(e.parameter.save_data);
@@ -265,17 +263,17 @@ function doGet(e) {
 function doPost(e) {
   var sheet = getOrCreateSheet();
   var rawData = "";
-  
+
   if (e && e.postData && e.postData.contents) {
     rawData = e.postData.contents;
   } else if (e && e.parameter && e.parameter.data) {
     rawData = e.parameter.data;
   }
-  
+
   if (rawData) {
     sheet.getRange(1, 1).setValue(rawData);
   }
-  
+
   return ContentService.createTextOutput(JSON.stringify({status: "ok"}))
     .setMimeType(ContentService.MimeType.JSON);
 }</pre>
@@ -444,13 +442,10 @@ function doPost(e) {
         <option value="credit">له / واصل</option>
       </select>
 
-      <div class="form-group">
-        <label>عبر إيش (طريقة الدفع / التحصيل)</label>
-        <select id="entry-payment-channel" onchange="syncChannelToNote()">
-          <option value="نقداً" selected>نقداً</option>
-          <option value="تحويل / بنك">تحويل / بنك</option>
-          <option value="كريمي / محفظة">كريمي / محفظة</option>
-          <option value="آجل / حساب">آجل / حساب</option>
+      <div class="form-group" id="entry-channel-group">
+        <label id="entry-channel-label">عبر إيش (طريقة الدفع / التحصيل)</label>
+        <select id="entry-payment-channel" onchange="onPaymentChannelChange()">
+          <option value="آجل" selected>آجل</option>
         </select>
       </div>
 
@@ -460,14 +455,16 @@ function doPost(e) {
       </div>
 
       <div class="form-group">
-        <label>التاريخ</label>
-        <input type="date" id="entry-trans-date">
+        <label>التاريخ <span id="entry-date-day-badge" style="color:#2563eb; font-weight:900;"></span></label>
+        <input type="date" id="entry-trans-date" onchange="updateEntryDateDayLabel()">
       </div>
 
-      <div class="form-group">
-        <label>البيان / تفاصيل</label>
-        <input type="text" id="entry-trans-note" placeholder="مثلاً: كروت فئة 1000، دفعة نقدية...">
+      <div class="form-group" id="entry-channel-ref-box">
+        <label id="entry-channel-ref-label" style="font-size:11px; font-weight:800; color:#1e3a8a;">التفاصيل / رقم الحوالة أو المرجع (اختياري)</label>
+        <input type="text" id="entry-channel-ref" oninput="syncUnifiedNoteFromInputs()" placeholder="مثلاً: رقم الحوالة، رقم المرجع، البيان...">
       </div>
+
+      <input type="hidden" id="entry-trans-note" value="">
 
         <button type="button" onclick="addTransactionFromFirstTab()" class="btn btn-blue" style="width: 100%; justify-content: center; padding: 10px; font-size: 13px;">حفظ الحركة في الحساب</button>
       </div>
@@ -627,7 +624,7 @@ function doPost(e) {
 
             <div class="stats-grid">
               <div class="stat-card stat-amber"><span class="label">إجمالي الحساب (عليه)</span><span id="det-debit" class="val">0</span></div>
-              <div class="stat-card stat-green"><span class="label">إجمالي المسدد (له)</span><span id="det-credit" class="val">0</span></div>
+              <div class="stat-card stat-green"><span class="label">إجمالي الواصل (له)</span><span id="det-credit" class="val">0</span></div>
               <div class="stat-card stat-blue"><span class="label">الباقي المطلوب</span><span id="det-remaining" class="val">0</span></div>
             </div>
 
@@ -643,6 +640,19 @@ function doPost(e) {
                   </tr>
                 </thead>
                 <tbody id="det-table-body"></tbody>
+                <tfoot id="det-table-foot">
+                  <tr style="background: #f8fafc; font-weight: 900; border-top: 2px solid #cbd5e1;">
+                    <td colspan="2" style="color: #0f172a;">الإجمالي والواصل</td>
+                    <td id="det-foot-debit" style="color: #b45309;">0 ريال</td>
+                    <td id="det-foot-credit" style="color: #047857;">0 ريال</td>
+                    <td class="no-print"></td>
+                  </tr>
+                  <tr style="background: #eff6ff; font-weight: 900;">
+                    <td colspan="2" style="color: #1e3a8a;">الباقي عليه</td>
+                    <td colspan="2" id="det-foot-rem" style="color: #dc2626; font-size: 13px;">0 ريال</td>
+                    <td class="no-print"></td>
+                  </tr>
+                </tfoot>
               </table>
             </div>
 
@@ -652,6 +662,7 @@ function doPost(e) {
               <button onclick="copySummaryText()" class="btn btn-gray" style="background: #0284c7; color: #fff;">📋 نسخ الإجمالي فقط</button>
               <button onclick="exportAsImage()" class="btn btn-gray">🖼️ حفظ صورة</button>
               <button onclick="saveStatementPDF()" class="btn btn-blue">📄 حفظ PDF</button>
+              <button onclick="printStatementOnly()" class="btn btn-gray">🖨️ طباعة</button>
             </div>
           </div>
         </div>
@@ -775,32 +786,6 @@ function doPost(e) {
       setTimeout(() => { el.style.display = 'none'; }, 4000);
     }
 
-    function configureCloudURL() {
-      const url = prompt('أدخل رابط تطبيق الويب (Google Apps Script Web App URL):', cloudURL);
-      if (url !== null) {
-        cloudURL = url.trim();
-        localStorage.setItem('naif_net_cloud_url', cloudURL);
-        if (cloudURL) {
-          notify('تم حفظ رابط السحابة بنجاح! جاري المزامنة...', '#059669');
-          syncWithCloud();
-        }
-      }
-    }
-
-    function configureTelegram() {
-      const token = prompt('أدخل توكن بوت تيليجرام (Telegram Bot Token):', telegramToken);
-      if (token !== null) {
-        const chatId = prompt('أدخل رقم معرف الدردشة (Chat ID الخاص بك):', telegramChatId);
-        if (chatId !== null) {
-          telegramToken = token.trim();
-          telegramChatId = chatId.trim();
-          localStorage.setItem('naif_net_tg_token', telegramToken);
-          localStorage.setItem('naif_net_tg_chatid', telegramChatId);
-          notify('✅ تم حفظ إعدادات بوت تيليجرام بنجاح!', '#059669');
-        }
-      }
-    }
-
     async function backupToTelegram() {
       if (!telegramToken || !telegramChatId) {
         openUnifiedPanel('settings');
@@ -809,7 +794,7 @@ function doPost(e) {
 
       const backupData = JSON.stringify(ledger, null, 2);
       const blob = new Blob([backupData], { type: 'application/json' });
-      
+
       const now = new Date();
       const timeString = now.toTimeString().split(' ')[0].replace(/:/g, '-');
       const dateTimeString = `${now.toISOString().slice(0,10)}_${timeString}`;
@@ -826,7 +811,7 @@ function doPost(e) {
           method: 'POST',
           body: formData
         });
-        
+
         let result = await response.json();
         if (result.ok) {
           notify('✅ تم إرسال النسخة الاحتياطية إلى تيليجرام بنجاح!', '#059669');
@@ -877,7 +862,7 @@ function doPost(e) {
       try {
         const res = await fetch(cloudURL + (cloudURL.includes('?') ? '&' : '?') + 'nocache=' + Date.now());
         const data = await res.json();
-        
+
         if (data && typeof data === 'object' && Object.keys(data).length > 0) {
           ledger = data;
           localStorage.setItem('naif_net_ledger', JSON.stringify(ledger));
@@ -905,7 +890,7 @@ function doPost(e) {
 
       if (cloudURL) {
         const payload = JSON.stringify(ledger);
-        
+
         fetch(cloudURL, {
           method: 'POST',
           mode: 'no-cors',
@@ -946,59 +931,6 @@ function doPost(e) {
         datalist.innerHTML += `<option value="${name}">`;
         select.innerHTML += `<option value="${name}" ${name === curr ? 'selected' : ''}>${name}</option>`;
       });
-    }
-
-    function autoFillPhone() {
-      const name = document.getElementById('cust-name').value.trim();
-      if (ledger[name] && ledger[name].phone) {
-        document.getElementById('cust-phone').value = ledger[name].phone;
-      }
-    }
-
-    function addTransaction() {
-      const nameIn = document.getElementById('cust-name');
-      const phoneIn = document.getElementById('cust-phone');
-      const typeIn = document.getElementById('trans-type');
-      const amountIn = document.getElementById('trans-amount');
-      const dateIn = document.getElementById('trans-date');
-      const noteIn = document.getElementById('trans-note');
-
-      const name = nameIn.value.trim();
-      const phone = phoneIn.value.trim();
-      const type = typeIn.value;
-      const amount = parseFloat(amountIn.value);
-      const date = dateIn.value;
-      const note = noteIn.value.trim() || (type === 'debit' ? 'قيد كروت / باقات' : 'دفعة نقدية');
-
-      if (!name || isNaN(amount) || amount <= 0 || !date) {
-        alert('يرجى كتابة اسم العميل وتحديد المبلغ والتاريخ بصورة صحيحة');
-        return;
-      }
-
-      if (!ledger[name]) {
-        ledger[name] = { phone: phone || '', transactions: [] };
-      } else if (phone) {
-        ledger[name].phone = phone;
-      }
-
-      ledger[name].transactions.push({
-        id: Date.now(),
-        date,
-        type,
-        amount,
-        note
-      });
-
-      saveState();
-
-      nameIn.value = '';
-      phoneIn.value = '';
-      amountIn.value = '';
-      noteIn.value = '';
-      dateIn.valueAsDate = new Date();
-      nameIn.focus();
-
-      openCustomer(name);
     }
 
     function openCustomer(name) {
@@ -1056,8 +988,8 @@ function doPost(e) {
 
         tbody.innerHTML += `
           <tr>
-            <td>${t.date}</td>
-            <td style="font-weight: 700;">${t.note}</td>
+            <td style="font-weight: 800; white-space: nowrap;">${formatDateWithDay(t.date)}</td>
+            <td style="font-weight: 700;">${cleanDisplayNote(t.note)}</td>
             <td style="font-weight: 700; color: ${isDebit ? '#b45309' : '#cbd5e1'};">${isDebit ? t.amount.toLocaleString() : '-'}</td>
             <td style="font-weight: 700; color: ${!isDebit ? '#047857' : '#cbd5e1'};">${!isDebit ? t.amount.toLocaleString() : '-'}</td>
             <td class="no-print" style="text-align: center;">
@@ -1071,6 +1003,12 @@ function doPost(e) {
       document.getElementById('det-debit').innerText = totalDebit.toLocaleString() + ' ريال';
       document.getElementById('det-credit').innerText = totalCredit.toLocaleString() + ' ريال';
       document.getElementById('det-remaining').innerText = net.toLocaleString() + ' ريال';
+      const fDebit = document.getElementById('det-foot-debit');
+      const fCredit = document.getElementById('det-foot-credit');
+      const fRem = document.getElementById('det-foot-rem');
+      if (fDebit) fDebit.innerText = 'عليه: ' + totalDebit.toLocaleString() + ' ريال';
+      if (fCredit) fCredit.innerText = 'الواصل (له): ' + totalCredit.toLocaleString() + ' ريال';
+      if (fRem) fRem.innerText = net.toLocaleString() + ' ريال';
 
       const netEl = document.getElementById('det-net-balance');
       netEl.innerText = net.toLocaleString() + ' ريال';
@@ -1191,9 +1129,9 @@ function doPost(e) {
         msg += `• ${t.date} | ${t.note}: ${t.amount.toLocaleString()} ريال (${t.type === 'debit' ? 'عليه' : 'واصل'})\n`;
       });
       msg += `-------------------------\n`;
-      msg += `إجمالي الحساب (عليه): ${d.toLocaleString()} ريال\n`;
-      msg += `إجمالي المسدد (له): ${cr.toLocaleString()} ريال\n`;
-      msg += `*الرصيد المتبقي المطلوب: ${(d - cr).toLocaleString()} ريال*\n`;
+      msg += `الإجمالي (عليه): ${d.toLocaleString()} ريال\n`;
+      msg += `الواصل (له): ${cr.toLocaleString()} ريال\n`;
+      msg += `*الباقي عليه: ${(d - cr).toLocaleString()} ريال*\n`;
       msg += `-------------------------\n_شكراً لتعاملكم معنا_`;
       return msg;
     }
@@ -1245,7 +1183,7 @@ function doPost(e) {
     function askWhatsAppType() {
       if (!activeCustomer || !ledger[activeCustomer]) return;
       const choice = prompt('اختر طريقة الإرسال عبر الواتساب:\n1 - كشف الحساب مفصلاً\n2 - الإجمالي المطلوب فقط\n\nاكتب رقم 1 أو 2:', '1');
-      
+
       if (choice === '1') {
         sendViaWhatsApp(generateDetailedText());
       } else if (choice === '2') {
@@ -1263,20 +1201,53 @@ function doPost(e) {
 
     function exportAsImage() {
       const area = document.getElementById('statement-area');
+      if (!area) return;
       const btns = area.querySelectorAll('.no-print');
       btns.forEach(b => b.style.display = 'none');
-      
-      html2canvas(area, { scale: 2 }).then(canvas => {
+
+      // رفع معامل الدقة وتفعيل مضاعفة كثافة البكسلات لجعل الخطوط حادة جداً عند التقريب
+      const dpr = Math.max(window.devicePixelRatio || 1, 3);
+      const captureScale = Math.min(4, Math.max(3, dpr));
+
+      html2canvas(area, {
+        scale: captureScale,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#ffffff',
+        logging: false,
+        imageTimeout: 0,
+        onclone: (clonedDoc) => {
+          const clonedArea = clonedDoc.getElementById('statement-area');
+          if (clonedArea) {
+            clonedArea.style.background = '#ffffff';
+            clonedArea.style.color = '#0f172a';
+            clonedArea.style.webkitFontSmoothing = 'antialiased';
+            clonedArea.style.textRendering = 'geometricPrecision';
+            clonedArea.querySelectorAll('td, th, span, div, h2, h3, p, b').forEach(el => {
+              el.style.textShadow = 'none';
+            });
+          }
+        }
+      }).then(canvas => {
         btns.forEach(b => b.style.display = '');
-        
+
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.imageSmoothingEnabled = true;
+          ctx.imageSmoothingQuality = 'high';
+        }
+
         const now = new Date();
-        const timeString = now.toTimeString().split(' ')[0].replace(/:/g, '-');
-        const dateTimeString = `${now.toISOString().slice(0,10)}_${timeString}`;
-        
+        const dateTimeString = formatSaveStamp(now).fileNameStamp;
+
         const a = document.createElement('a');
         a.download = `كشف_${activeCustomer}_${dateTimeString}.png`;
-        a.href = canvas.toDataURL();
+        a.href = canvas.toDataURL('image/png', 1.0);
         a.click();
+      }).catch(err => {
+        btns.forEach(b => b.style.display = '');
+        console.error('خطأ في حفظ الصورة عالية الدقة:', err);
+        alert('تعذر حفظ الصورة، جرّب مرة أخرى.');
       });
     }
 
@@ -1301,6 +1272,7 @@ function doPost(e) {
     }
 
     document.getElementById('entry-trans-date').valueAsDate = new Date();
+    if (typeof updateEntryDateDayLabel === 'function') updateEntryDateDayLabel();
     if (typeof onEntryModeChange === 'function') onEntryModeChange();
 
     function setSummaryBalanceFilter(mode, btnEl) {
@@ -1346,17 +1318,6 @@ function doPost(e) {
       box.style.display = 'flex';
     }
 
-    function applyQuickPreset(noteText, amountVal, typeVal) {
-      const noteIn = document.getElementById('entry-trans-note');
-      const amtIn = document.getElementById('entry-trans-amount');
-      const typeIn = document.getElementById('entry-trans-type');
-      const ch = document.getElementById('entry-payment-channel').value;
-      if (typeIn && typeVal) typeIn.value = typeVal;
-      if (noteIn) noteIn.value = `${noteText} (${ch})`;
-      if (amtIn && amountVal !== '') amtIn.value = amountVal;
-      if (amtIn && amountVal === '') amtIn.focus();
-    }
-
     function addDetailVoucherLine(desc = '', qty = '', price = '') {
       const wrap = document.getElementById('detail-voucher-lines');
       if (!wrap) return;
@@ -1373,13 +1334,112 @@ function doPost(e) {
       calcDetailsVoucher();
     }
 
+    const CREDIT_CHANNELS = ['نقد', 'حوالة', 'كريمي إيداع', 'جيب', 'ون كاش', 'فلوسك'];
+
+    function isCreditMode(mode) {
+      return mode === 'normal_credit' || mode === 'settled';
+    }
+
+    function populatePaymentChannelsForMode(mode) {
+      const sel = document.getElementById('entry-payment-channel');
+      const lbl = document.getElementById('entry-channel-label');
+      if (!sel) return;
+      const prevVal = sel.value;
+
+      if (isCreditMode(mode)) {
+        if (lbl) lbl.innerText = 'عبر إيش (طريقة التسديد / التحصيل)';
+        sel.innerHTML = '';
+        CREDIT_CHANNELS.forEach(cName => {
+          const opt = document.createElement('option');
+          opt.value = cName;
+          opt.textContent = cName;
+          sel.appendChild(opt);
+        });
+        if (CREDIT_CHANNELS.includes(prevVal)) {
+          sel.value = prevVal;
+        } else {
+          sel.selectedIndex = 0;
+        }
+      } else {
+        if (lbl) lbl.innerText = 'طريقة الدفع';
+        sel.innerHTML = '<option value="آجل" selected>آجل</option>';
+        sel.value = 'آجل';
+      }
+      updateChannelRefUI();
+    }
+
+    function updateChannelRefUI() {
+      const mode = document.getElementById('entry-mode').value;
+      const sel = document.getElementById('entry-payment-channel');
+      const refBox = document.getElementById('entry-channel-ref-box');
+      const refLbl = document.getElementById('entry-channel-ref-label');
+      const refInp = document.getElementById('entry-channel-ref');
+      if (!sel || !refBox || !refLbl || !refInp) return;
+
+      const ch = sel.value;
+      if (mode === 'normal_debit') {
+        refLbl.innerText = 'البيان / تفاصيل الحركة';
+        refInp.placeholder = 'مثلاً: كروت فئة 100، اشتراك شهري...';
+      } else if (!isCreditMode(mode)) {
+        refLbl.innerText = 'ملاحظة / تفاصيل إضافية (اختياري)';
+        refInp.placeholder = 'مثلاً: تفاصيل أو مرجع إضافي...';
+      } else if (ch === 'نقد') {
+        refLbl.innerText = 'تفاصيل التسديد النقدي / البيان (اختياري)';
+        refInp.placeholder = 'مثلاً: مستلم بواسطة أو رقم السند...';
+      } else {
+        refLbl.innerText = `تفاصيل ${ch} (رقم الحوالة / رقم المرجع)`;
+        refInp.placeholder = `أدخل رقم الحوالة أو رقم المرجع لـ ${ch}...`;
+      }
+    }
+
+    function buildFormattedChannelSuffix() {
+      const mode = document.getElementById('entry-mode').value;
+      const sel = document.getElementById('entry-payment-channel');
+      const refInp = document.getElementById('entry-channel-ref');
+      const ch = sel ? sel.value : (isCreditMode(mode) ? 'نقد' : 'آجل');
+      const ref = refInp ? (refInp.value || '').trim() : '';
+
+      if (!isCreditMode(mode)) {
+        return ref ? ` (${ref})` : '';
+      }
+      if (ref) {
+        return ` (${ch} - ${ref})`;
+      }
+      return ` (${ch})`;
+    }
+
+    function syncUnifiedNoteFromInputs() {
+      const mode = document.getElementById('entry-mode').value;
+      const noteIn = document.getElementById('entry-trans-note');
+      const refInp = document.getElementById('entry-channel-ref');
+      const ref = refInp ? (refInp.value || '').trim() : '';
+      if (!noteIn) return;
+
+      if (mode === 'cards') {
+        calcCardsVoucher();
+      } else if (mode === 'details') {
+        calcDetailsVoucher();
+      } else if (mode === 'normal_debit') {
+        noteIn.value = ref || 'قيد كروت / باقات';
+      } else if (mode === 'normal_credit') {
+        noteIn.value = `دفعة / تسديد${buildFormattedChannelSuffix()}`;
+      } else if (mode === 'settled') {
+        noteIn.value = `تسديد مسدد${buildFormattedChannelSuffix()}`;
+      }
+    }
+
+    function onPaymentChannelChange() {
+      updateChannelRefUI();
+      syncUnifiedNoteFromInputs();
+    }
+
     function onEntryModeChange() {
       const mode = document.getElementById('entry-mode').value;
       const cardsPanel = document.getElementById('entry-cards-panel');
       const detailsPanel = document.getElementById('entry-details-panel');
       const typeSel = document.getElementById('entry-trans-type');
-      const noteIn = document.getElementById('entry-trans-note');
-      const ch = document.getElementById('entry-payment-channel').value;
+
+      populatePaymentChannelsForMode(mode);
 
       cardsPanel.classList.toggle('open', mode === 'cards');
       const quickCardsSec = document.getElementById('entry-quick-cards-section');
@@ -1392,7 +1452,6 @@ function doPost(e) {
         if (typeSel) typeSel.value = 'debit';
       } else if (mode === 'normal_credit') {
         if (typeSel) typeSel.value = 'credit';
-        if (noteIn && !noteIn.value.trim()) noteIn.value = `دفعة / تسديد (${ch})`;
       } else if (mode === 'cards') {
         if (typeSel) typeSel.value = 'debit';
         onCardPresetChange();
@@ -1403,8 +1462,8 @@ function doPost(e) {
         calcDetailsVoucher();
       } else if (mode === 'settled') {
         if (typeSel) typeSel.value = 'credit';
-        if (noteIn && !noteIn.value.trim()) noteIn.value = `تسديد مسدد (${ch})`;
       }
+      syncUnifiedNoteFromInputs();
     }
 
     function onCardPresetChange() {
@@ -1431,8 +1490,6 @@ function doPost(e) {
       const qtyInp = document.getElementById('card-qty');
       const amtIn = document.getElementById('entry-trans-amount');
       const noteIn = document.getElementById('entry-trans-note');
-      const ch = document.getElementById('entry-payment-channel').value;
-
       const parts = sel ? sel.value.split('|') : ['100', 'كروت فئة 100 ريال'];
       const itemLabel = parts[0] === 'custom' ? 'كروت' : parts[1];
       const unitPrice = parseFloat(priceInp.value) || 0;
@@ -1442,14 +1499,14 @@ function doPost(e) {
       document.getElementById('card-calc-total').innerText = `${total.toLocaleString()} ريال`;
       amtIn.value = total > 0 ? total : '';
       if (qty > 0) {
-        noteIn.value = `${itemLabel} | عدد ${qty} × ${unitPrice.toLocaleString()} = ${total.toLocaleString()} (${ch})`;
+        const chSuffix = buildFormattedChannelSuffix();
+        noteIn.value = `${itemLabel} | عدد ${qty} × ${unitPrice.toLocaleString()} = ${total.toLocaleString()}${chSuffix}`;
       }
     }
 
     function calcDetailsVoucher() {
       let sum = 0;
       const parts = [];
-      const ch = document.getElementById('entry-payment-channel').value;
       document.querySelectorAll('#detail-voucher-lines .voucher-line-row').forEach(row => {
         const d = row.querySelector('.dv-desc').value.trim();
         const q = parseFloat(row.querySelector('.dv-qty').value) || 0;
@@ -1465,13 +1522,15 @@ function doPost(e) {
       const amtIn = document.getElementById('entry-trans-amount');
       const noteIn = document.getElementById('entry-trans-note');
       if (sum > 0) amtIn.value = sum;
-      if (parts.length > 0) noteIn.value = `فاتورة تفاصيل: ${parts.join('، ')} (${ch})`;
+      if (parts.length > 0) {
+        const chSuffix = buildFormattedChannelSuffix();
+        noteIn.value = `${parts.join('، ')}${chSuffix}`;
+      }
     }
 
     function syncChannelToNote() {
       const mode = document.getElementById('entry-mode').value;
-      if (mode === 'cards') calcCardsVoucher();
-      else if (mode === 'details') calcDetailsVoucher();
+      syncUnifiedNoteFromInputs();
     }
 
     let lastEntryStatementCustomer = '';
@@ -1507,8 +1566,8 @@ function doPost(e) {
         else cr += amt;
         tbody.innerHTML += `
           <tr>
-            <td>${t.date || '-'}</td>
-            <td style="font-weight:700;">${t.note || '-'}</td>
+            <td style="font-weight:800; white-space:nowrap;">${formatDateWithDay(t.date)}</td>
+            <td style="font-weight:700;">${cleanDisplayNote(t.note)}</td>
             <td style="font-weight:700; color:${isDebit ? '#b45309' : '#cbd5e1'};">${isDebit ? amt.toLocaleString() : '-'}</td>
             <td style="font-weight:700; color:${!isDebit ? '#047857' : '#cbd5e1'};">${!isDebit ? amt.toLocaleString() : '-'}</td>
           </tr>
@@ -1541,8 +1600,7 @@ function doPost(e) {
 
     function addTransactionFromFirstTab() {
       const mode = document.getElementById('entry-mode').value;
-      if (mode === 'cards') calcCardsVoucher();
-      else if (mode === 'details') calcDetailsVoucher();
+      syncUnifiedNoteFromInputs();
 
       const nameIn = document.getElementById('entry-cust-name');
       const phoneIn = document.getElementById('entry-cust-phone');
@@ -1550,14 +1608,13 @@ function doPost(e) {
       const amountIn = document.getElementById('entry-trans-amount');
       const dateIn = document.getElementById('entry-trans-date');
       const noteIn = document.getElementById('entry-trans-note');
-      const ch = document.getElementById('entry-payment-channel').value;
-
       const name = (nameIn.value || '').trim();
       const phone = (phoneIn.value || '').trim();
       const type = typeIn.value;
       const amount = parseFloat(amountIn.value);
       const date = dateIn.value || new Date().toISOString().slice(0, 10);
-      const defaultNote = type === 'debit' ? `قيد كروت / باقات (${ch})` : `دفعة نقدية (${ch})`;
+      const chClean = buildFormattedChannelSuffix();
+      const defaultNote = type === 'debit' ? `قيد كروت / باقات${chClean}` : `دفعة / تسديد${chClean}`;
       const note = (noteIn.value || '').trim() || defaultNote;
 
       if (!name || isNaN(amount) || amount <= 0 || !date) {
@@ -1604,7 +1661,6 @@ function doPost(e) {
       updateEntryInstantBalance();
       nameIn.focus();
     }
-
 
     let cardDenominations = JSON.parse(localStorage.getItem('naif_net_card_denoms')) || [
       { name: 'كروت فئة 100 ريال', price: 100 },
@@ -1754,6 +1810,53 @@ function doPost(e) {
 
     renderCardDenominationsUI();
 
+    function cleanDisplayNote(noteStr) {
+      let n = String(noteStr || '-');
+      n = n.replace(/^فاتورة تفاصيل:\s*/g, '');
+      n = n.replace(/\s*\(آجل \/ حساب\)/g, '');
+      n = n.replace(/^دفعة \/ تسديد$/g, 'دفعة / تسديد');
+      return n.trim() || '-';
+    }
+
+    function getArabicWeekday(dateStr) {
+      if (!dateStr) return '';
+      const parts = String(dateStr).split('-');
+      if (parts.length !== 3) return '';
+      const dt = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+      if (isNaN(dt.getTime())) return '';
+      const days = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+      return days[dt.getDay()] || '';
+    }
+
+    function formatDateWithDay(dateStr) {
+      if (!dateStr) return '-';
+      const dayName = getArabicWeekday(dateStr);
+      return dayName ? `${dayName}<br><span style="font-size:11px; color:#64748b;">${dateStr}</span>` : dateStr;
+    }
+
+    function updateEntryDateDayLabel() {
+      const inp = document.getElementById('entry-trans-date');
+      const lbl = document.getElementById('entry-date-day-badge');
+      if (!inp || !lbl) return;
+      const d = getArabicWeekday(inp.value);
+      lbl.innerText = d ? `(${d})` : '';
+    }
+
+    function formatSaveStamp(d = new Date()) {
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const dd = String(d.getDate()).padStart(2, '0');
+      const HH = String(d.getHours()).padStart(2, '0');
+      const rawHours = d.getHours();
+      const period = rawHours >= 12 ? 'م' : 'ص';
+      const h12 = rawHours % 12 === 0 ? 12 : rawHours % 12;
+      const minStr = String(d.getMinutes()).padStart(2, '0');
+      const secStr = String(d.getSeconds()).padStart(2, '0');
+      return {
+        display: `${yyyy}/${mm}/${dd} ${h12}:${minStr} ${period}`,
+        fileNameStamp: `${yyyy}-${mm}-${dd}_${HH}-${minStr}-${secStr}`
+      };
+    }
 
     function getFormattedDateAndTimeParts(d = new Date()) {
       const yyyy = d.getFullYear();
@@ -1785,44 +1888,179 @@ function doPost(e) {
       notify(`✅ تم تحميل النسخة الاحتياطية للجوال: ${fileName}`, '#059669');
     }
 
-    function buildSimplePdfBlob(lines) {
-      // Escape PDF literal string characters safely
-      const esc = (s) => String(s || '').replace(/\\/g, '\\\\').replace(/\(/g, '\\(').replace(/\)/g, '\\)').replace(/[^\x20-\x7E]/g, '?');
-      let y = 780;
-      const streamLines = ['BT', '/F1 13 Tf', '40 ' + y + ' Td'];
-      lines.forEach((line, idx) => {
-        if (idx > 0) {
-          y -= 20;
-          streamLines.push('0 -20 Td');
-        }
-        streamLines.push('(' + esc(line) + ') Tj');
-      });
-      streamLines.push('ET');
-      const streamContent = streamLines.join('\n');
-      const len = streamContent.length;
-
-      const objects = [
-        '1 0 obj << /Type /Catalog /Pages 2 0 R >> endobj',
-        '2 0 obj << /Type /Pages /Kids [3 0 R] /Count 1 >> endobj',
-        '3 0 obj << /Type /Page /Parent 2 0 R /MediaBox [0 0 612 842] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >> endobj',
-        '4 0 obj << /Type /Font /Subtype /Type1 /BaseFont /Helvetica >> endobj',
-        '5 0 obj << /Length ' + len + ' >> stream\n' + streamContent + '\nendstream endobj'
-      ];
-
-      let pdf = '%PDF-1.4\n';
-      const offsets = [0];
-      objects.forEach(obj => {
-        offsets.push(pdf.length);
-        pdf += obj + '\n';
-      });
-      const xrefStart = pdf.length;
-      pdf += 'xref\n0 ' + (objects.length + 1) + '\n';
-      pdf += '0000000000 65535 f \n';
-      for (let i = 1; i < offsets.length; i++) {
-        pdf += String(offsets[i]).padStart(10, '0') + ' 00000 n \n';
+    async function deflateBytes(bytes) {
+      if (typeof CompressionStream === 'function') {
+        const cs = new CompressionStream('deflate');
+        const writer = cs.writable.getWriter();
+        writer.write(bytes);
+        writer.close();
+        const compressedBuf = await new Response(cs.readable).arrayBuffer();
+        return new Uint8Array(compressedBuf);
       }
-      pdf += 'trailer << /Size ' + (objects.length + 1) + ' /Root 1 0 R >>\nstartxref\n' + xrefStart + '\n%%EOF';
-      return new Blob([pdf], { type: 'application/pdf' });
+      return null;
+    }
+
+    async function buildMultiPageA4Pdf(sourceCanvas, rowRangesPx = []) {
+      const pageW = 595.28;
+      const pageH = 841.89;
+      const marginPt = 18;
+      const contentW = pageW - (marginPt * 2);
+      const contentH = pageH - (marginPt * 2);
+
+      const srcW = sourceCanvas.width;
+      const srcH = sourceCanvas.height;
+      const maxSliceH = Math.max(1, Math.floor((contentH / contentW) * srcW));
+
+      // Sort row ranges by top position and ensure cuts never occur inside any row
+      const sortedRows = [...rowRangesPx].sort((a, b) => a.top - b.top);
+      const slices = [];
+      let sy = 0;
+      while (sy < srcH) {
+        let candidateEnd = Math.min(srcH, sy + maxSliceH);
+        if (candidateEnd < srcH && sortedRows.length > 0) {
+          for (let i = 0; i < sortedRows.length; i++) {
+            const r = sortedRows[i];
+            if (r.top < candidateEnd && r.bottom > candidateEnd) {
+              // Cut right before this row starts so the entire row moves cleanly to the next page
+              if (r.top > sy + 20) {
+                candidateEnd = r.top;
+              }
+              break;
+            }
+          }
+        }
+        const sh = Math.max(1, candidateEnd - sy);
+        slices.push({ sy, sh });
+        sy = candidateEnd;
+      }
+
+      const numPages = slices.length;
+      const pageEntries = [];
+      for (let p = 0; p < numPages; p++) {
+        const { sy, sh } = slices[p];
+        const pageCanvas = document.createElement('canvas');
+        pageCanvas.width = srcW;
+        pageCanvas.height = sh;
+        const pctx = pageCanvas.getContext('2d');
+        pctx.fillStyle = '#ffffff';
+        pctx.fillRect(0, 0, srcW, sh);
+        pctx.drawImage(sourceCanvas, 0, sy, srcW, sh, 0, 0, srcW, sh);
+
+        const imgData = pctx.getImageData(0, 0, srcW, sh).data;
+        const rgbBytes = new Uint8Array(srcW * sh * 3);
+        let j = 0;
+        for (let i = 0; i < imgData.length; i += 4) {
+          const alpha = imgData[i + 3] / 255;
+          rgbBytes[j++] = Math.round(imgData[i] * alpha + 255 * (1 - alpha));
+          rgbBytes[j++] = Math.round(imgData[i + 1] * alpha + 255 * (1 - alpha));
+          rgbBytes[j++] = Math.round(imgData[i + 2] * alpha + 255 * (1 - alpha));
+        }
+
+        const deflated = await deflateBytes(rgbBytes);
+        const drawH = (sh / srcW) * contentW;
+        const yPos = pageH - marginPt - drawH;
+        const contentStream = `q\n${contentW.toFixed(2)} 0 0 ${drawH.toFixed(2)} ${marginPt.toFixed(2)} ${yPos.toFixed(2)} cm\n/Im${p} Do\nQ`;
+
+        if (deflated) {
+          pageEntries.push({
+            w: srcW,
+            h: sh,
+            bytes: deflated,
+            isFlate: true,
+            contentStream
+          });
+        } else {
+          const jpegUrl = pageCanvas.toDataURL('image/jpeg', 0.96);
+          const b64 = jpegUrl.split(',')[1] || '';
+          const bin = atob(b64);
+          const jpgBytes = new Uint8Array(bin.length);
+          for (let k = 0; k < bin.length; k++) jpgBytes[k] = bin.charCodeAt(k);
+          pageEntries.push({
+            w: srcW,
+            h: sh,
+            bytes: jpgBytes,
+            isFlate: false,
+            contentStream
+          });
+        }
+      }
+
+      const enc = new TextEncoder();
+      const chunks = [];
+      const objOffsets = {};
+
+      chunks.push(enc.encode('%PDF-1.4\n'));
+      let curOffset = chunks[0].length;
+
+      const pushObj = (id, bodyBytes) => {
+        objOffsets[id] = curOffset;
+        const head = enc.encode(`${id} 0 obj\n`);
+        const tail = enc.encode('\nendobj\n');
+        chunks.push(head, bodyBytes, tail);
+        curOffset += head.length + bodyBytes.length + tail.length;
+      };
+
+      const pageObjIds = [];
+      for (let i = 0; i < numPages; i++) {
+        pageObjIds.push(3 + (i * 3));
+      }
+
+      pushObj(1, enc.encode('<< /Type /Catalog /Pages 2 0 R >>'));
+      pushObj(2, enc.encode(`<< /Type /Pages /Kids [${pageObjIds.map(id => `${id} 0 R`).join(' ')}] /Count ${numPages} >>`));
+
+      for (let i = 0; i < numPages; i++) {
+        const pe = pageEntries[i];
+        const pageObjId = 3 + (i * 3);
+        const imgObjId = 4 + (i * 3);
+        const cntObjId = 5 + (i * 3);
+        const filterDict = pe.isFlate ? '/Filter /FlateDecode ' : '/Filter /DCTDecode ';
+
+        pushObj(
+          pageObjId,
+          enc.encode(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${pageW.toFixed(2)} ${pageH.toFixed(2)}] /Resources << /XObject << /Im${i} ${imgObjId} 0 R >> >> /Contents ${cntObjId} 0 R >>`)
+        );
+
+        const imgHead = enc.encode(`<< /Type /XObject /Subtype /Image /Width ${pe.w} /Height ${pe.h} /ColorSpace /DeviceRGB /BitsPerComponent 8 ${filterDict}/Length ${pe.bytes.length} >> stream\n`);
+        const imgTail = enc.encode('\nendstream');
+        const imgBody = new Uint8Array(imgHead.length + pe.bytes.length + imgTail.length);
+        imgBody.set(imgHead, 0);
+        imgBody.set(pe.bytes, imgHead.length);
+        imgBody.set(imgTail, imgHead.length + pe.bytes.length);
+        pushObj(imgObjId, imgBody);
+
+        pushObj(cntObjId, enc.encode(`<< /Length ${pe.contentStream.length} >> stream\n${pe.contentStream}\nendstream`));
+      }
+
+      const maxObjId = 2 + (numPages * 3);
+      const xrefStart = curOffset;
+      let xref = `xref\n0 ${maxObjId + 1}\n0000000000 65535 f \n`;
+      for (let id = 1; id <= maxObjId; id++) {
+        xref += `${String(objOffsets[id] || 0).padStart(10, '0')} 00000 n \n`;
+      }
+      xref += `trailer << /Size ${maxObjId + 1} /Root 1 0 R >>\nstartxref\n${xrefStart}\n%%EOF`;
+      chunks.push(enc.encode(xref));
+
+      const totalLen = chunks.reduce((acc, c) => acc + c.length, 0);
+      const out = new Uint8Array(totalLen);
+      let pos = 0;
+      for (const c of chunks) {
+        out.set(c, pos);
+        pos += c.length;
+      }
+      return new Blob([out], { type: 'application/pdf' });
+    }
+
+    function printStatementOnly() {
+      if (!activeCustomer || !ledger[activeCustomer]) {
+        alert('يرجى اختيار عميل أولاً لعرض كشف حسابه وطباعته');
+        return;
+      }
+      const safeName = String(activeCustomer).trim().replace(/[\\/:*?"<>|]/g, '').replace(/\s+/g, '_') || 'Client';
+      const stamp = formatSaveStamp(new Date()).fileNameStamp;
+      const prevTitle = document.title;
+      document.title = `كشف_${safeName}_${stamp}`;
+      window.print();
+      document.title = prevTitle;
     }
 
     function saveStatementPDF() {
@@ -1830,46 +2068,98 @@ function doPost(e) {
         alert('يرجى اختيار عميل أولاً لعرض كشف حسابه وحفظه PDF');
         return;
       }
+      const area = document.getElementById('statement-area');
+      if (!area) return;
+
+      const now = new Date();
+      const stamp = formatSaveStamp(now).fileNameStamp;
       const safeName = String(activeCustomer).trim().replace(/[\\/:*?"<>|]/g, '').replace(/\s+/g, '_') || 'Client';
-      const dateStr = getFormattedDateAndTimeParts(new Date()).datePart;
-      const baseTitle = `كشف_${safeName}_${dateStr}`;
-      const prevTitle = document.title;
+      const fileName = `كشف_${safeName}_${stamp}.pdf`;
 
-      // ضبط عنوان الصفحة باسم الشخص وتاريخ الحفظ قبل الطباعة/الحفظ كـ PDF
-      document.title = baseTitle;
+      const btns = area.querySelectorAll('.no-print');
+      btns.forEach(b => { b.style.display = 'none'; });
 
-      // إنشاء ملف PDF حقيقي قابل للتحميل باسم الشخص وتاريخ الحفظ لتسهيل حفظه على الجوال
-      const c = ledger[activeCustomer];
-      let d = 0, cr = 0;
-      const txs = Array.isArray(c.transactions) ? c.transactions : [];
-      txs.forEach(t => { if (t.type === 'debit') d += Number(t.amount) || 0; else cr += Number(t.amount) || 0; });
-      const pdfLines = [
-        'NAIF.NET Wireless Network - Account Statement',
-        'Customer: ' + activeCustomer,
-        'Phone: ' + (c.phone || 'N/A'),
-        'Date: ' + dateStr,
-        'Total Debit: ' + d + ' | Total Credit: ' + cr + ' | Remaining: ' + (d - cr),
-        '------------------------------------------------------------'
-      ];
-      txs.forEach(t => {
-        pdfLines.push(`${t.date || ''} | ${t.type === 'debit' ? 'Debit' : 'Credit'} | ${Number(t.amount) || 0} | ${t.note || ''}`);
+      notify('⏳ جاري تنسيق وحفظ ملف PDF المرتب...', '#2563eb');
+
+      const captureScale = 2.5;
+      let measuredRowRanges = [];
+
+      // Render at a clean desktop/A4-proportioned width (820px) inside the clone so columns & details stay aligned and crisp
+      const origWidth = area.style.width;
+      const origMaxWidth = area.style.maxWidth;
+
+      html2canvas(area, {
+        scale: captureScale,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#ffffff',
+        logging: false,
+        windowWidth: 960,
+        onclone: (clonedDoc) => {
+          const clonedArea = clonedDoc.getElementById('statement-area');
+          if (!clonedArea) return;
+          clonedArea.style.width = '820px';
+          clonedArea.style.maxWidth = '820px';
+          clonedArea.style.margin = '0 auto';
+          clonedArea.style.background = '#ffffff';
+          clonedArea.style.color = '#0f172a';
+          clonedArea.style.webkitFontSmoothing = 'antialiased';
+          clonedArea.style.textRendering = 'geometricPrecision';
+
+          clonedArea.querySelectorAll('table').forEach(tbl => {
+            tbl.style.width = '100%';
+            tbl.style.tableLayout = 'fixed';
+            tbl.style.borderCollapse = 'collapse';
+          });
+          clonedArea.querySelectorAll('th, td').forEach(cell => {
+            cell.style.verticalAlign = 'middle';
+            cell.style.lineHeight = '1.5';
+            cell.style.wordBreak = 'break-word';
+            cell.style.padding = '8px 10px';
+          });
+
+          // Give clean proportional column widths: التاريخ (18%), البيان والتفاصيل (46%), عليه (18%), له (18%)
+          clonedArea.querySelectorAll('tr').forEach(tr => {
+            const cells = tr.children;
+            if (cells.length >= 4) {
+              cells[0].style.width = '18%';
+              cells[1].style.width = '46%';
+              cells[2].style.width = '18%';
+              cells[3].style.width = '18%';
+            }
+          });
+
+          const areaRect = clonedArea.getBoundingClientRect();
+          measuredRowRanges = Array.from(clonedArea.querySelectorAll('tbody tr')).map(tr => {
+            const r = tr.getBoundingClientRect();
+            return {
+              top: Math.max(0, Math.floor((r.top - areaRect.top) * captureScale)),
+              bottom: Math.max(0, Math.ceil((r.bottom - areaRect.top) * captureScale))
+            };
+          });
+        }
+      }).then(async (canvas) => {
+        btns.forEach(b => { b.style.display = ''; });
+        area.style.width = origWidth;
+        area.style.maxWidth = origMaxWidth;
+
+        const pdfBlob = await buildMultiPageA4Pdf(canvas, measuredRowRanges);
+        const pdfUrl = URL.createObjectURL(pdfBlob);
+        const link = document.createElement('a');
+        link.href = pdfUrl;
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        setTimeout(() => URL.revokeObjectURL(pdfUrl), 1500);
+        notify(`✅ تم حفظ ملف PDF (${formatSaveStamp(now).display}): ${fileName}`, '#059669');
+      }).catch(err => {
+        btns.forEach(b => { b.style.display = ''; });
+        area.style.width = origWidth;
+        area.style.maxWidth = origMaxWidth;
+        console.error('خطأ في توليد PDF:', err);
+        alert('تعذر حفظ ملف PDF، جرّب مرة أخرى.');
       });
-
-      const pdfBlob = buildSimplePdfBlob(pdfLines);
-      const pdfUrl = URL.createObjectURL(pdfBlob);
-      const link = document.createElement('a');
-      link.href = pdfUrl;
-      link.download = `${baseTitle}.pdf`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      setTimeout(() => URL.revokeObjectURL(pdfUrl), 1500);
-
-      // إتاحة نافذة الطباعة أيضاً بنفس اسم المستند
-      setTimeout(() => {
-        window.print();
-        document.title = prevTitle;
-      }, 250);
     }
 
   </script>
