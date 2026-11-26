@@ -1,4 +1,4 @@
-const CACHE_NAME = 'naif-net-v2';
+const CACHE_NAME = 'naif-net-v3';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
